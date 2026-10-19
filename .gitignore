@@ -1,0 +1,13 @@
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Slicer / temporary outputs
+*.gcode
+*.3mf.bak
+stl_exports/

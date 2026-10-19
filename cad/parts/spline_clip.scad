@@ -1,0 +1,34 @@
+// ====================================================================
+// Snap-in Cellophane Spline Clips
+// Pre-sized locking spline clips for frame struts and door panels
+// ====================================================================
+include <../config.scad>
+use <../modules/spline_profile.scad>
+
+// Preset lengths matching the frame segments
+module spline_clip_x() {
+    spline_clip(length = SEG_LEN_X - 10);
+}
+
+module spline_clip_y() {
+    spline_clip(length = SEG_LEN_Y - 10);
+}
+
+module spline_clip_z() {
+    spline_clip(length = SEG_LEN_Z - 10);
+}
+
+module spline_clip_short() {
+    spline_clip(length = 100);
+}
+
+// Print array of 4 clips side-by-side
+module spline_clip_array(count = 4, length = 150) {
+    for (i = [0 : count - 1]) {
+        translate([0, i * 14, 0])
+        spline_clip(length = length);
+    }
+}
+
+// Preview 4 clips array
+spline_clip_array(count = 4, length = 170);
