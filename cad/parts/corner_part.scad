@@ -1,12 +1,11 @@
 // ====================================================================
 // 1. Universal Directional 3-Way Corner Block (Part 1 of 8)
-// 100% 3D Printable on Bambu Lab A1
-// Features 2 Female wedge sockets and 1 Male wedge tenon.
+// 100% 3D Printable on Bambu Lab A1 (Support-Free)
+// Features 2 open-top Female wedge sockets and 1 upright Male wedge tenon.
 // Rotated at each vertex of the 8 enclosure corners for continuous daisy-chaining.
 // ====================================================================
 include <../config.scad>
 use <../modules/dovetail.scad>
-use <../modules/spline_profile.scad>
 
 module corner_part() {
     cs = CORNER_SIZE;
@@ -15,34 +14,34 @@ module corner_part() {
     
     difference() {
         union() {
-            // Main cubic body
-            cube([cs, cs, cs], center = false);
+            // Base corner junction block at [0, 0, 0]
+            cube([bw, bw, bw], center = false);
             
-            // Male wedge tenon on +Z face (projects in +Z direction)
+            // Branch along +X (24x24 cross-section extending to cs)
+            cube([cs, bw, bw], center = false);
+            
+            // Branch along +Y (24x24 cross-section extending to cs)
+            cube([bw, cs, bw], center = false);
+            
+            // Branch along +Z (24x24 cross-section extending to cs)
+            cube([bw, bw, cs], center = false);
+            
+            // Male wedge tenon on +Z arm (projects upright in +Z direction)
             translate([bw/2, bh/2, cs])
-            rotate([-90, 0, 0])
+            rotate([90, 0, 0])
             male_dovetail(w = bw, h = bh);
         }
         
-        // Inner corner clearance for weight reduction and clean interior
-        translate([bw, bw, 0])
-        cube([cs, cs, cs + 1], center = false);
-        
-        // Female wedge socket on +X face (recesses into -X)
+        // Female open-top wedge pocket on +X arm (recesses into -X, open at +Z)
         translate([cs, bw/2, bh/2])
         rotate([0, 0, -90])
         female_dovetail_pocket(w = bw, h = bh);
         
-        // Female wedge socket on +Y face (recesses into -Y)
+        // Female open-top wedge pocket on +Y arm (recesses into -Y, open at +Z)
         translate([bw/2, cs, bh/2])
         female_dovetail_pocket(w = bw, h = bh);
         
-        // Outer spline groove for static wall cellophane
-        translate([0, cs/2, bh/2])
-        rotate([0, -90, 0])
-        spline_groove_negative(length = cs + 2, axis = "Y");
-        
-        // Rubber bumper foot recess on bottom face
+        // Rubber bumper foot recess on bottom face (-Z)
         translate([bw/2, bw/2, 0])
         cylinder(d = 12, h = 3, center = true);
     }
@@ -50,3 +49,4 @@ module corner_part() {
 
 // Standalone preview
 corner_part();
+

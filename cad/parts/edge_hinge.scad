@@ -1,7 +1,8 @@
 // ====================================================================
 // 3. Frame Edge with Door Hinge (Part 3 of 8)
-// Standardized 185 mm structural beam with front-offset female hinge knuckle
-// Placed on front vertical pillars to hang the face-overlay French doors
+// Standardized 185 mm structural beam with integrated female hinge knuckle
+// Replaces 1 spline side (+Z) with the hinge knuckle.
+// Side wall cellophane spline is on +X; door side is on opposite side (-X).
 // ====================================================================
 include <../config.scad>
 use <../modules/dovetail.scad>
@@ -15,14 +16,23 @@ module edge_hinge(
     height = BEAM_HEIGHT,
     is_left_pillar = true
 ) {
+    knuckle_x = is_left_pillar ? (-width/2 + 4.0) : (width/2 - 4.0);
     union() {
-        // Base edge body (smooth front face, outer spline groove for side wall)
-        edge_standard(length = length, width = width, height = height, has_spline = true);
+        // Base edge body:
+        // has_spline_x = true (side wall cellophane)
+        // has_spline_z = false (replaced by hinge)
+        edge_standard(
+            length = length,
+            width  = width,
+            height = height,
+            has_spline_x = true,
+            has_spline_z = false
+        );
         
-        // Front-offset female hinge barrel
+        // Female hinge knuckle on +Z face (replacing 1 spline side)
+        // Positioned toward the door side (-X on left pillar, +X on right pillar)
         // Offset forward so the overlay door swings 180° flat against the side
-        offset_x = is_left_pillar ? -width/2 - 2.0 : width/2 + 2.0;
-        translate([offset_x, 0, height/2 + 2.0])
+        translate([knuckle_x, 0, height/2 + 2.0])
         rotate([90, 0, 0])
         hinge_female_knuckle();
     }

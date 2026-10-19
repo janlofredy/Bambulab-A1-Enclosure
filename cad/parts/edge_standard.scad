@@ -1,6 +1,7 @@
 // ====================================================================
 // 2. Standard Frame Edge Strut (Part 2 of 8)
 // Standardized 185 mm structural beam
+// Features 2 spline slots on outside edges (+X and +Z faces)
 // Features Male wedge on +Y end, Female open-top pocket on -Y end
 // ====================================================================
 include <../config.scad>
@@ -11,16 +12,27 @@ module edge_standard(
     length = FRAME_EDGE_LEN,
     width  = BEAM_WIDTH,
     height = BEAM_HEIGHT,
-    has_spline = true
+    has_spline = true,
+    has_spline_x = undef,
+    has_spline_z = undef
 ) {
+    spline_x = is_undef(has_spline_x) ? has_spline : has_spline_x;
+    spline_z = is_undef(has_spline_z) ? has_spline : has_spline_z;
+
     difference() {
         // Main solid beam body
         cube([width, length, height], center = true);
         
-        // Outer face spline groove (along Y axis on +X face)
-        if (has_spline) {
+        // Spline slot 1 on outside edge (+X face)
+        if (spline_x) {
             translate([width/2, 0, 0])
             rotate([0, 90, 0])
+            spline_groove_negative(length = length + 2, axis = "Y");
+        }
+        
+        // Spline slot 2 on outside edge (+Z face)
+        if (spline_z) {
+            translate([0, 0, height/2])
             spline_groove_negative(length = length + 2, axis = "Y");
         }
         
