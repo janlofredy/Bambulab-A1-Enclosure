@@ -1,0 +1,652 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Bambu Lab A1 Enclosure - 3D Interactive Viewer</title>
+  <script src="https://www.gstatic.com/antigravity/web/dev/tailwindcss.min.js"></script>
+  <style>
+    body {
+      margin: 0;
+      user-select: none;
+      -webkit-user-select: none;
+      overflow: hidden;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    }
+    canvas {
+      display: block;
+      touch-action: none;
+    }
+    .custom-scrollbar::-webkit-scrollbar {
+      width: 4px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+      background: var(--border, rgba(255,255,255,0.2));
+      border-radius: 4px;
+    }
+  </style>
+</head>
+<body class="bg-[var(--background,#0f172a)] text-[var(--foreground,#f8fafc)] antialiased h-screen w-screen flex flex-col">
+
+  <!-- Top Navigation & Controls Header -->
+  <header class="bg-[var(--card,#1e293b)]/90 backdrop-blur border-b border-[var(--border,#334155)] px-4 py-2.5 flex items-center justify-between shrink-0 z-10 shadow-sm">
+    <div class="flex items-center space-x-3">
+      <div class="w-8 h-8 rounded-lg bg-orange-500/20 text-orange-400 border border-orange-500/30 flex items-center justify-center font-bold text-sm">
+        A1
+      </div>
+      <div>
+        <h1 class="text-sm font-semibold text-[var(--foreground,#f8fafc)] leading-tight flex items-center gap-2">
+          Bambu Lab A1 Enclosure
+          <span class="text-xs px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 font-normal">100% 3D Printable</span>
+        </h1>
+        <p class="text-[12px] text-[var(--muted-foreground,#94a3b8)]">Hardware-Free • Cellophane Wall Retention • BMCU 370c Compatible</p>
+      </div>
+    </div>
+
+    <!-- Quick Camera Preset Buttons -->
+    <div class="flex items-center gap-1.5 bg-[var(--background,#0f172a)]/60 p-1 rounded-lg border border-[var(--border,#334155)]">
+      <button onclick="setCameraPreset('iso')" class="px-2.5 py-1 text-xs rounded font-medium hover:bg-white/10 transition-colors">Iso</button>
+      <button onclick="setCameraPreset('front')" class="px-2.5 py-1 text-xs rounded font-medium hover:bg-white/10 transition-colors">Front</button>
+      <button onclick="setCameraPreset('side')" class="px-2.5 py-1 text-xs rounded font-medium hover:bg-white/10 transition-colors">Side</button>
+      <button onclick="setCameraPreset('top')" class="px-2.5 py-1 text-xs rounded font-medium hover:bg-white/10 transition-colors">Top</button>
+      <button onclick="toggleAutoRotate()" id="btn-autorotate" class="px-2.5 py-1 text-xs rounded font-medium bg-orange-500/20 text-orange-400 border border-orange-500/30 hover:bg-orange-500/30 transition-colors">Rotate</button>
+    </div>
+  </header>
+
+  <!-- Main Viewport Area -->
+  <div class="relative flex-1 w-full h-full overflow-hidden">
+    <!-- 3D Canvas -->
+    <canvas id="viewport" class="w-full h-full cursor-grab active:cursor-grabbing"></canvas>
+
+    <!-- Floating Interactive Controls Overlay (Left Panel) -->
+    <div class="absolute top-4 left-4 w-72 bg-[var(--card,#1e293b)]/85 backdrop-blur-md border border-[var(--border,#334155)] rounded-xl p-3.5 shadow-xl text-xs space-y-3.5 z-10 max-h-[calc(100vh-100px)] overflow-y-auto custom-scrollbar">
+      
+      <!-- Exploded View Slider -->
+      <div>
+        <div class="flex justify-between items-center mb-1">
+          <span class="font-medium text-[var(--foreground,#f8fafc)]">Exploded View</span>
+          <span id="label-explode" class="text-[12px] text-orange-400 font-mono">0%</span>
+        </div>
+        <input type="range" id="slider-explode" min="0" max="100" value="0" class="w-full accent-orange-500 cursor-pointer h-1.5 bg-gray-700 rounded-lg">
+      </div>
+
+      <!-- Front French Doors Slider -->
+      <div>
+        <div class="flex justify-between items-center mb-1">
+          <span class="font-medium text-[var(--foreground,#f8fafc)]">Front French Doors</span>
+          <span id="label-doors" class="text-[12px] text-cyan-400 font-mono">0° (Closed)</span>
+        </div>
+        <input type="range" id="slider-doors" min="0" max="110" value="0" class="w-full accent-cyan-400 cursor-pointer h-1.5 bg-gray-700 rounded-lg">
+        <div class="flex justify-between mt-1 text-[11px] text-[var(--muted-foreground,#94a3b8)]">
+          <button onclick="setDoorAngle(0)" class="hover:text-cyan-400">Closed</button>
+          <button onclick="setDoorAngle(45)" class="hover:text-cyan-400">Ajar (45°)</button>
+          <button onclick="setDoorAngle(90)" class="hover:text-cyan-400">Open (90°)</button>
+        </div>
+      </div>
+
+      <!-- Top Roof Doors & Prop Legs -->
+      <div>
+        <div class="flex justify-between items-center mb-1">
+          <span class="font-medium text-[var(--foreground,#f8fafc)]">Top Roof Doors (Prop Legs)</span>
+          <span id="label-roof" class="text-[12px] text-amber-400 font-mono">0° (Closed)</span>
+        </div>
+        <input type="range" id="slider-roof" min="0" max="75" value="0" class="w-full accent-amber-400 cursor-pointer h-1.5 bg-gray-700 rounded-lg">
+        <div class="flex justify-between mt-1 text-[11px] text-[var(--muted-foreground,#94a3b8)]">
+          <button onclick="setRoofAngle(0)" class="hover:text-amber-400">Closed</button>
+          <button onclick="setRoofAngle(30)" class="hover:text-amber-400">30° Vent</button>
+          <button onclick="setRoofAngle(60)" class="hover:text-amber-400">60° Cooling</button>
+        </div>
+      </div>
+
+      <hr class="border-[var(--border,#334155)]">
+
+      <!-- Visibility Toggles -->
+      <div class="space-y-2">
+        <span class="font-medium text-[var(--foreground,#f8fafc)] block">Display Layers</span>
+        
+        <label class="flex items-center gap-2 cursor-pointer">
+          <input type="checkbox" id="check-cellophane" checked class="rounded border-gray-600 accent-blue-500">
+          <span>Cellophane Packaging Walls</span>
+        </label>
+        
+        <label class="flex items-center gap-2 cursor-pointer">
+          <input type="checkbox" id="check-printer" checked class="rounded border-gray-600 accent-orange-500">
+          <span>Bambu Lab A1 + Bed Travel</span>
+        </label>
+
+        <label class="flex items-center gap-2 cursor-pointer">
+          <input type="checkbox" id="check-bmcu" checked class="rounded border-gray-600 accent-red-500">
+          <span>Top BMCU 370c & Spool</span>
+        </label>
+
+        <label class="flex items-center gap-2 cursor-pointer">
+          <input type="checkbox" id="check-ptfe" checked class="rounded border-gray-600 accent-emerald-500">
+          <span>Highlight 4-Tube PTFE Route</span>
+        </label>
+
+        <label class="flex items-center gap-2 cursor-pointer">
+          <input type="checkbox" id="check-animate-bed" checked class="rounded border-gray-600 accent-purple-500">
+          <span>Animate Bed Slinger Y-Travel</span>
+        </label>
+      </div>
+    </div>
+
+    <!-- Selected Component Inspector Card (Bottom-Right) -->
+    <div id="inspector-card" class="absolute bottom-4 right-4 w-80 bg-[var(--card,#1e293b)]/90 backdrop-blur-md border border-[var(--border,#334155)] rounded-xl p-4 shadow-2xl text-xs z-10 transition-all duration-200">
+      <div class="flex items-start justify-between">
+        <div>
+          <span class="text-[11px] font-semibold tracking-wider text-orange-400 uppercase">Component Inspector</span>
+          <h3 id="inspect-title" class="text-sm font-bold text-[var(--foreground,#f8fafc)] mt-0.5">Dual French Front Doors</h3>
+        </div>
+        <span id="inspect-tag" class="px-2 py-0.5 text-[11px] font-medium rounded bg-cyan-500/20 text-cyan-400 border border-cyan-500/30">Hinged Panel</span>
+      </div>
+      <p id="inspect-desc" class="text-[12px] text-[var(--muted-foreground,#94a3b8)] mt-2 leading-relaxed">
+        Twin hinged door leaves that swing open from the center. Each door leaf is segmented under 237 mm to easily print on the A1.
+      </p>
+      <div class="mt-3 pt-2.5 border-t border-[var(--border,#334155)] grid grid-cols-2 gap-2 text-[11px]">
+        <div>
+          <span class="text-[var(--muted-foreground,#94a3b8)]">Dimensions:</span>
+          <div id="inspect-dim" class="font-mono text-[var(--foreground,#f8fafc)] font-medium">560 × 710 mm</div>
+        </div>
+        <div>
+          <span class="text-[var(--muted-foreground,#94a3b8)]">Fasteners:</span>
+          <div id="inspect-fasteners" class="font-mono text-emerald-400 font-medium">0 Screws (Pins)</div>
+        </div>
+        <div class="col-span-2">
+          <span class="text-[var(--muted-foreground,#94a3b8)]">Source CAD File:</span>
+          <div id="inspect-file" class="font-mono text-orange-300">cad/parts/front_door.scad</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Navigation Help Pill (Bottom-Left) -->
+    <div class="absolute bottom-4 left-4 bg-[var(--card,#1e293b)]/70 backdrop-blur border border-[var(--border,#334155)] rounded-lg px-3 py-1.5 text-[11px] text-[var(--muted-foreground,#94a3b8)] flex items-center gap-3">
+      <span>🖱️ <b>Left Drag</b> Orbit</span>
+      <span>📜 <b>Scroll</b> Zoom</span>
+      <span>🖐️ <b>Right Drag</b> Pan</span>
+    </div>
+  </div>
+
+  <script>
+    // -------------------------------------------------------------
+    // Lightweight High-Performance 3D Scene Graph & Canvas Renderer
+    // Zero external dependencies • 100% CSP compliant
+    // -------------------------------------------------------------
+    const canvas = document.getElementById('viewport');
+    const ctx = canvas.getContext('2d');
+
+    // State Variables
+    let width = 0, height = 0;
+    let yaw = -0.75, pitch = 0.42;
+    let distance = 1450;
+    let targetX = 0, targetY = 0, targetZ = 350;
+    let isDragging = false, dragButton = 0;
+    let lastMouseX = 0, lastMouseY = 0;
+    let autoRotate = false;
+    let bedAnimationTime = 0;
+
+    // Component Sliders
+    let explodeFactor = 0;
+    let doorAngle = 0; // in degrees
+    let roofAngle = 0; // in degrees
+
+    // Toggles
+    const showCellophane = document.getElementById('check-cellophane');
+    const showPrinter = document.getElementById('check-printer');
+    const showBmcu = document.getElementById('check-bmcu');
+    const showPtfe = document.getElementById('check-ptfe');
+    const animateBed = document.getElementById('check-animate-bed');
+
+    // Enclosure Specs (mm)
+    const ENC_W = 560; // X
+    const ENC_D = 580; // Y
+    const ENC_H = 710; // Z
+    const BEAM_T = 24;
+
+    function resize() {
+      const rect = canvas.getBoundingClientRect();
+      width = canvas.width = rect.width * window.devicePixelRatio;
+      height = canvas.height = rect.height * window.devicePixelRatio;
+    }
+    window.addEventListener('resize', resize);
+
+    // Camera Presets
+    function setCameraPreset(view) {
+      autoRotate = false;
+      document.getElementById('btn-autorotate').classList.remove('bg-orange-500', 'text-white');
+      if (view === 'iso') {
+        yaw = -0.75; pitch = 0.42; distance = 1450;
+      } else if (view === 'front') {
+        yaw = 0; pitch = 0.05; distance = 1350;
+      } else if (view === 'side') {
+        yaw = -Math.PI/2; pitch = 0.05; distance = 1350;
+      } else if (view === 'top') {
+        yaw = 0; pitch = Math.PI/2 - 0.05; distance = 1500;
+      }
+    }
+
+    function toggleAutoRotate() {
+      autoRotate = !autoRotate;
+      const btn = document.getElementById('btn-autorotate');
+      if (autoRotate) {
+        btn.classList.add('bg-orange-500', 'text-white');
+      } else {
+        btn.classList.remove('bg-orange-500', 'text-white');
+      }
+    }
+
+    function setDoorAngle(deg) {
+      doorAngle = deg;
+      document.getElementById('slider-doors').value = deg;
+      document.getElementById('label-doors').innerText = deg + '° (' + (deg === 0 ? 'Closed' : deg < 90 ? 'Ajar' : 'Open') + ')';
+    }
+
+    function setRoofAngle(deg) {
+      roofAngle = deg;
+      document.getElementById('slider-roof').value = deg;
+      document.getElementById('label-roof').innerText = deg + '° (' + (deg === 0 ? 'Closed' : 'Propped') + ')';
+    }
+
+    // Slider Event Listeners
+    document.getElementById('slider-explode').addEventListener('input', (e) => {
+      explodeFactor = parseFloat(e.target.value) / 100;
+      document.getElementById('label-explode').innerText = e.target.value + '%';
+    });
+
+    document.getElementById('slider-doors').addEventListener('input', (e) => {
+      setDoorAngle(parseFloat(e.target.value));
+    });
+
+    document.getElementById('slider-roof').addEventListener('input', (e) => {
+      setRoofAngle(parseFloat(e.target.value));
+    });
+
+    // Mouse & Touch Orbit Controls
+    canvas.addEventListener('mousedown', (e) => {
+      isDragging = true;
+      dragButton = e.button;
+      lastMouseX = e.clientX;
+      lastMouseY = e.clientY;
+      autoRotate = false;
+      document.getElementById('btn-autorotate').classList.remove('bg-orange-500', 'text-white');
+    });
+
+    window.addEventListener('mouseup', () => { isDragging = false; });
+
+    window.addEventListener('mousemove', (e) => {
+      if (!isDragging) return;
+      const dx = e.clientX - lastMouseX;
+      const dy = e.clientY - lastMouseY;
+      lastMouseX = e.clientX;
+      lastMouseY = e.clientY;
+
+      if (dragButton === 0) { // Orbit
+        yaw += dx * 0.007;
+        pitch = Math.max(-Math.PI/2 + 0.05, Math.min(Math.PI/2 - 0.05, pitch - dy * 0.007));
+      } else { // Pan
+        const cosY = Math.cos(yaw), sinY = Math.sin(yaw);
+        targetX += (-sinY * dx - cosY * dy * Math.sin(pitch)) * 0.8;
+        targetY += ( cosY * dx - sinY * dy * Math.sin(pitch)) * 0.8;
+        targetZ += (dy * Math.cos(pitch)) * 0.8;
+      }
+    });
+
+    canvas.addEventListener('wheel', (e) => {
+      e.preventDefault();
+      distance = Math.max(400, Math.min(3200, distance + e.deltaY * 1.5));
+    }, { passive: false });
+
+    // Touch Support
+    let lastTouchDist = 0;
+    canvas.addEventListener('touchstart', (e) => {
+      if (e.touches.length === 1) {
+        lastMouseX = e.touches[0].clientX;
+        lastMouseY = e.touches[0].clientY;
+        isDragging = true;
+      } else if (e.touches.length === 2) {
+        lastTouchDist = Math.hypot(
+          e.touches[0].clientX - e.touches[1].clientX,
+          e.touches[0].clientY - e.touches[1].clientY
+        );
+      }
+    });
+
+    canvas.addEventListener('touchmove', (e) => {
+      if (e.touches.length === 1 && isDragging) {
+        const dx = e.touches[0].clientX - lastMouseX;
+        const dy = e.touches[0].clientY - lastMouseY;
+        lastMouseX = e.touches[0].clientX;
+        lastMouseY = e.touches[0].clientY;
+        yaw += dx * 0.007;
+        pitch = Math.max(-Math.PI/2 + 0.05, Math.min(Math.PI/2 - 0.05, pitch - dy * 0.007));
+      } else if (e.touches.length === 2) {
+        const dist = Math.hypot(
+          e.touches[0].clientX - e.touches[1].clientX,
+          e.touches[0].clientY - e.touches[1].clientY
+        );
+        distance = Math.max(400, Math.min(3200, distance - (dist - lastTouchDist) * 3));
+        lastTouchDist = dist;
+      }
+    });
+
+    canvas.addEventListener('touchend', () => { isDragging = false; });
+
+    // -------------------------------------------------------------
+    // 3D Math & Polygon Pipeline
+    // -------------------------------------------------------------
+    function project(x, y, z) {
+      // Relative to target
+      const rx = x - targetX;
+      const ry = y - targetY;
+      const rz = z - targetZ;
+
+      // Yaw rotation (Z-axis)
+      const cosY = Math.cos(yaw), sinY = Math.sin(yaw);
+      const x1 = cosY * rx - sinY * ry;
+      const y1 = sinY * rx + cosY * ry;
+      const z1 = rz;
+
+      // Pitch rotation (X-axis)
+      const cosP = Math.cos(pitch), sinP = Math.sin(pitch);
+      const x2 = x1;
+      const y2 = cosP * y1 - sinP * z1;
+      const z2 = sinP * y1 + cosP * z1;
+
+      // Camera distance translation
+      const camZ = y2 + distance;
+      if (camZ <= 10) return null; // Behind camera clipping
+
+      const fov = 1100 * (height / 800);
+      const sx = (x2 * fov) / camZ + width / 2;
+      const sy = (-z2 * fov) / camZ + height / 2;
+
+      return { sx, sy, depth: camZ };
+    }
+
+    // Box Generator producing 6 quad faces
+    function createBox(cx, cy, cz, sx, sy, sz, color, alpha = 1.0, strokeColor = null, name = '') {
+      const hx = sx/2, hy = sy/2, hz = sz/2;
+      const vertices = [
+        [cx - hx, cy - hy, cz - hz],
+        [cx + hx, cy - hy, cz - hz],
+        [cx + hx, cy + hy, cz - hz],
+        [cx - hx, cy + hy, cz - hz],
+        [cx - hx, cy - hy, cz + hz],
+        [cx + hx, cy - hy, cz + hz],
+        [cx + hx, cy + hy, cz + hz],
+        [cx - hx, cy + hy, cz + hz]
+      ];
+
+      // Standard box face definitions with face normal indicators
+      const faces = [
+        { idx: [0, 1, 2, 3], norm: [0, 0, -1] }, // Bottom
+        { idx: [4, 7, 6, 5], norm: [0, 0,  1] }, // Top
+        { idx: [0, 4, 5, 1], norm: [0, -1, 0] }, // Front (-Y)
+        { idx: [2, 6, 7, 3], norm: [0,  1, 0] }, // Back (+Y)
+        { idx: [0, 3, 7, 4], norm: [-1, 0, 0] }, // Left (-X)
+        { idx: [1, 5, 6, 2], norm: [ 1, 0, 0] }  // Right (+X)
+      ];
+
+      return faces.map(f => {
+        return {
+          type: 'polygon',
+          pts: f.idx.map(i => vertices[i]),
+          norm: f.norm,
+          color: color,
+          alpha: alpha,
+          stroke: strokeColor,
+          name: name
+        };
+      });
+    }
+
+    // -------------------------------------------------------------
+    // Build Digital Twin Scene
+    // -------------------------------------------------------------
+    function buildScene() {
+      const polygons = [];
+      const exp = explodeFactor * 120; // Exploded offset
+
+      const COLOR_BEAM    = '#334155'; // Slate-700
+      const COLOR_CORNER  = '#f97316'; // Orange-500
+      const COLOR_PTFE    = '#10b981'; // Emerald-500
+      const COLOR_DOOR    = '#06b6d4'; // Cyan-500
+      const COLOR_ROOF    = '#f59e0b'; // Amber-500
+      const COLOR_PLASTIC = '#93c5fd'; // Light blue cellophane
+
+      const hw = ENC_W / 2;
+      const hd = ENC_D / 2;
+      const hh = ENC_H / 2;
+
+      // 1. Bottom Corner Blocks (4x)
+      const corners = [
+        { x: -hw, y: -hd, z: 0, dx: -1, dy: -1, dz: -1 },
+        { x:  hw, y: -hd, z: 0, dx:  1, dy: -1, dz: -1 },
+        { x: -hw, y:  hd, z: 0, dx: -1, dy:  1, dz: -1 },
+        { x:  hw, y:  hd, z: 0, dx:  1, dy:  1, dz: -1 },
+        // Top Corner Blocks (4x)
+        { x: -hw, y: -hd, z: ENC_H, dx: -1, dy: -1, dz: 1 },
+        { x:  hw, y: -hd, z: ENC_H, dx:  1, dy: -1, dz: 1 },
+        { x: -hw, y:  hd, z: ENC_H, dx: -1, dy:  1, dz: 1 },
+        { x:  hw, y:  hd, z: ENC_H, dx:  1, dy:  1, dz: 1 }
+      ];
+
+      corners.forEach((c, idx) => {
+        const ox = c.x + c.dx * exp;
+        const oy = c.y + c.dy * exp;
+        const oz = c.z + c.dz * exp;
+        polygons.push(...createBox(ox, oy, oz, 36, 36, 36, COLOR_CORNER, 1.0, '#ea580c', '3-Way Corner Block'));
+      });
+
+      // 2. Horizontal Frame Beams (4 Bottom, 4 Top)
+      // Front Bottom
+      polygons.push(...createBox(0, -hd - exp, 0 - exp, ENC_W - 72, BEAM_T, BEAM_T, COLOR_BEAM, 1.0, '#1e293b', 'Front Lower Beam'));
+      // Rear Bottom
+      polygons.push(...createBox(0,  hd + exp, 0 - exp, ENC_W - 72, BEAM_T, BEAM_T, COLOR_BEAM, 1.0, '#1e293b', 'Rear Lower Beam'));
+      // Front Top
+      polygons.push(...createBox(0, -hd - exp, ENC_H + exp, ENC_W - 72, BEAM_T, BEAM_T, COLOR_BEAM, 1.0, '#1e293b', 'Front Top Beam'));
+      // Rear Top
+      polygons.push(...createBox(0,  hd + exp, ENC_H + exp, ENC_W - 72, BEAM_T, BEAM_T, COLOR_BEAM, 1.0, '#1e293b', 'Rear Top Beam'));
+
+      // Right Bottom Beam
+      polygons.push(...createBox(hw + exp, 0, 0 - exp, BEAM_T, ENC_D - 72, BEAM_T, COLOR_BEAM, 1.0, '#1e293b', 'Right Side Beam'));
+      // Left Top Beam
+      polygons.push(...createBox(-hw - exp, 0, ENC_H + exp, BEAM_T, ENC_D - 72, BEAM_T, COLOR_BEAM, 1.0, '#1e293b', 'Left Top Beam'));
+      // Right Top Beam
+      polygons.push(...createBox(hw + exp, 0, ENC_H + exp, BEAM_T, ENC_D - 72, BEAM_T, COLOR_BEAM, 1.0, '#1e293b', 'Right Top Beam'));
+
+      // 3. Dedicated 4-Tube PTFE Route (Left Bottom Beam)
+      const ptfeColor = showPtfe.checked ? COLOR_PTFE : COLOR_BEAM;
+      polygons.push(...createBox(-hw - exp, 0, 0 - exp, BEAM_T, ENC_D - 72, BEAM_T, ptfeColor, 1.0, '#059669', 'PTFE 4-Tube Entry Module'));
+
+      // 4. Vertical Corner Pillars (4x)
+      const pillars = [
+        { x: -hw, y: -hd, dx: -1, dy: -1 },
+        { x:  hw, y: -hd, dx:  1, dy: -1 },
+        { x: -hw, y:  hd, dx: -1, dy:  1 },
+        { x:  hw, y:  hd, dx:  1, dy:  1 }
+      ];
+      pillars.forEach(p => {
+        polygons.push(...createBox(p.x + p.dx * exp, p.y + p.dy * exp, ENC_H / 2, BEAM_T, BEAM_T, ENC_H - 72, COLOR_BEAM, 1.0, '#1e293b', 'Vertical Pillar Segment'));
+      });
+
+      // 5. Dual French Front Doors (Left & Right)
+      const doorRad = (doorAngle * Math.PI) / 180;
+      const dw = (ENC_W / 2) - 10;
+      const dh = ENC_H - 24;
+
+      // Left Door Leaf (Hinged at x = -hw, y = -hd)
+      const lx0 = -hw - exp;
+      const ly0 = -hd - exp;
+      const lCos = Math.cos(-doorRad), lSin = Math.sin(-doorRad);
+      const lMidX = lx0 + (dw/2) * lCos;
+      const lMidY = ly0 + (dw/2) * lSin;
+      polygons.push(...createBox(lMidX, lMidY, ENC_H / 2, dw, 14, dh, COLOR_DOOR, 0.95, '#0891b2', 'Left French Door'));
+
+      // Right Door Leaf (Hinged at x = hw, y = -hd)
+      const rx0 = hw + exp;
+      const ry0 = -hd - exp;
+      const rCos = Math.cos(doorRad), rSin = Math.sin(doorRad);
+      const rMidX = rx0 - (dw/2) * rCos;
+      const rMidY = ry0 + (dw/2) * rSin;
+      polygons.push(...createBox(rMidX, rMidY, ENC_H / 2, dw, 14, dh, COLOR_DOOR, 0.95, '#0891b2', 'Right French Door'));
+
+      // 6. Dual Top Roof Doors & Heat-Dissipation Prop Legs
+      const roofRad = (roofAngle * Math.PI) / 180;
+      const rw = (ENC_W / 2) - 8;
+      const rd = ENC_D - 24;
+
+      // Left Roof Door (Hinged at left top rail x = -hw, z = ENC_H)
+      const rCosL = Math.cos(roofRad), rSinL = Math.sin(roofRad);
+      const rLeftX = -hw - exp + (rw/2) * rCosL;
+      const rLeftZ = ENC_H + exp + (rw/2) * rSinL;
+      polygons.push(...createBox(rLeftX, 0, rLeftZ, rw, rd, 12, COLOR_ROOF, 0.95, '#d97706', 'Left Roof Hatch'));
+
+      // Right Roof Door (Hinged at right top rail x = hw, z = ENC_H)
+      const rRightX = hw + exp - (rw/2) * rCosL;
+      const rRightZ = ENC_H + exp + (rw/2) * rSinL;
+      polygons.push(...createBox(rRightX, 0, rRightZ, rw, rd, 12, COLOR_ROOF, 0.95, '#d97706', 'Right Roof Hatch'));
+
+      // 7. Cellophane Packaging Walls (Translucent)
+      if (showCellophane.checked && explodeFactor < 0.8) {
+        const pAlpha = 0.22;
+        // Left Wall
+        polygons.push(...createBox(-hw, 0, ENC_H / 2, 2, ENC_D - 36, ENC_H - 36, COLOR_PLASTIC, pAlpha, null, 'Left Packaging Cellophane'));
+        // Right Wall
+        polygons.push(...createBox(hw, 0, ENC_H / 2, 2, ENC_D - 36, ENC_H - 36, COLOR_PLASTIC, pAlpha, null, 'Right Packaging Cellophane'));
+        // Rear Wall
+        polygons.push(...createBox(0, hd, ENC_H / 2, ENC_W - 36, 2, ENC_H - 36, COLOR_PLASTIC, pAlpha, null, 'Rear Packaging Cellophane'));
+      }
+
+      // 8. Bambu Lab A1 Bed Slinger & Envelope
+      if (showPrinter.checked) {
+        // Printer Base
+        polygons.push(...createBox(-20, 0, 35, 385, 340, 50, '#475569', 0.85, '#334155', 'Bambu Lab A1 Base'));
+        
+        // Z-Axis Gantry
+        polygons.push(...createBox(-20, 0, 260, 410, 50, 465, '#64748b', 0.80, '#475569', 'A1 Z-Gantry Frame'));
+
+        // Bed-Slinger Y-Travel (Animated back & forth)
+        let bedOffset = 0;
+        if (animateBed.checked) {
+          bedOffset = Math.sin(bedAnimationTime) * 110;
+        }
+        polygons.push(...createBox(-20, bedOffset, 72, 256, 256, 14, '#e2e8f0', 0.95, '#94a3b8', 'A1 Print Bed (256x256)'));
+
+        // Right-Side Poop Bucket
+        polygons.push(...createBox(hw - 55, -30, 60, 75, 130, 95, '#cbd5e1', 0.85, '#94a3b8', 'User Poop Bucket'));
+      }
+
+      // 9. Top BMCU 370c & Spool
+      if (showBmcu.checked) {
+        // Rotating Rail Mount
+        polygons.push(...createBox(-20, 0, 530, 90, 40, 60, '#ef4444', 0.95, '#b91c1c', 'BMCU 370c Rotating Rail Mount'));
+        // Filament Spool
+        polygons.push(...createBox(-20, 0, 615, 60, 200, 200, '#dc2626', 0.85, '#991b1b', 'Top Filament Spool'));
+      }
+
+      return polygons;
+    }
+
+    // -------------------------------------------------------------
+    // Render Loop (Painter's Algorithm Depth Sort)
+    // -------------------------------------------------------------
+    function render() {
+      ctx.clearRect(0, 0, width, height);
+
+      // Auto-rotate turntable
+      if (autoRotate) {
+        yaw += 0.005;
+      }
+      bedAnimationTime += 0.035;
+
+      const rawPolygons = buildScene();
+      const projectedList = [];
+
+      // Lighting vector (Top-Front-Right)
+      const lx = 0.5, ly = -0.7, lz = 0.5;
+      const lLen = Math.hypot(lx, ly, lz);
+      const nlx = lx / lLen, nly = ly / lLen, nlz = lz / lLen;
+
+      // Project each face
+      for (const poly of rawPolygons) {
+        let sumDepth = 0;
+        const screenPts = [];
+        let valid = true;
+
+        for (const pt of poly.pts) {
+          const pr = project(pt[0], pt[1], pt[2]);
+          if (!pr) { valid = false; break; }
+          screenPts.push(pr);
+          sumDepth += pr.depth;
+        }
+
+        if (valid && screenPts.length >= 3) {
+          // Flat Shading calculation using normal
+          let shade = 1.0;
+          if (poly.norm) {
+            const dot = poly.norm[0] * nlx + poly.norm[1] * nly + poly.norm[2] * nlz;
+            shade = 0.65 + Math.max(0, dot) * 0.35;
+          }
+
+          projectedList.push({
+            pts: screenPts,
+            depth: sumDepth / screenPts.length,
+            color: poly.color,
+            alpha: poly.alpha,
+            stroke: poly.stroke,
+            shade: shade
+          });
+        }
+      }
+
+      // Sort Back-to-Front (Painter's Algorithm)
+      projectedList.sort((a, b) => b.depth - a.depth);
+
+      // Draw Polygons
+      for (const p of projectedList) {
+        ctx.beginPath();
+        ctx.moveTo(p.pts[0].sx, p.pts[0].sy);
+        for (let i = 1; i < p.pts.length; i++) {
+          ctx.lineTo(p.pts[i].sx, p.pts[i].sy);
+        }
+        ctx.closePath();
+
+        // Shaded fill
+        ctx.save();
+        ctx.globalAlpha = p.alpha;
+        ctx.fillStyle = adjustBrightness(p.color, p.shade);
+        ctx.fill();
+
+        if (p.stroke && p.alpha > 0.5) {
+          ctx.strokeStyle = p.stroke;
+          ctx.lineWidth = 1;
+          ctx.stroke();
+        }
+        ctx.restore();
+      }
+
+      requestAnimationFrame(render);
+    }
+
+    // Helper to calculate shaded color
+    function adjustBrightness(hex, factor) {
+      if (!hex.startsWith('#')) return hex;
+      let c = hex.slice(1);
+      if (c.length === 3) c = c.split('').map(x => x + x).join('');
+      const num = parseInt(c, 16);
+      let r = (num >> 16) & 255;
+      let g = (num >> 8) & 255;
+      let b = num & 255;
+
+      r = Math.min(255, Math.floor(r * factor));
+      g = Math.min(255, Math.floor(g * factor));
+      b = Math.min(255, Math.floor(b * factor));
+      return `rgb(${r},${g},${b})`;
+    }
+
+    // Start
+    resize();
+    requestAnimationFrame(render);
+  </script>
+</body>
+</html>
