@@ -17,7 +17,7 @@ INTERNAL_HEIGHT = 710; // Z axis clearance (Gantry + BMCU 370c rotating mount + 
 
 // --- Standardized Modular Grid Lengths ---
 FRAME_EDGE_LEN  = 185.0; // Standardized length for ALL frame edge segments
-DOOR_EDGE_LEN   = 138.0; // Standardized length for ALL door/roof edge segments
+DOOR_EDGE_LEN   = 185.0; // Standardized length for ALL door vertical segments
 
 // --- Frame Profile Dimensions ---
 BEAM_WIDTH   = 24.0;  // Frame beam width X/Y (mm)
@@ -27,7 +27,7 @@ CORNER_SIZE  = 36.0;  // 3-way cubic corner junction dimension
 // --- Door Profile Dimensions (Slim Face-Overlay) ---
 DOOR_PROFILE_W = 18.0; // Width across door frame face (mm)
 DOOR_PROFILE_T = 16.0; // Thickness of door frame (mm)
-DOOR_CORNER_W  = 25.0; // L-shaped door corner block dimension (mm)
+DOOR_CORNER_W  = 30.0; // L-shaped door corner block dimension (mm)
 
 // --- Tolerances (FDM 3D Printing tuned for Bambu Lab A1 0.4mm nozzle) ---
 TOL_TIGHT    = 0.15; // Tight press fit (spline clips)
@@ -39,7 +39,7 @@ TOL_LOOSE    = 0.40; // Clearance gaps
 GROOVE_WIDTH      = 4.5;   // Width of U-channel
 GROOVE_DEPTH      = 4.5;   // Depth of U-channel (~20-30% of frame square)
 FRAME_SPLINE_LEN  = 180.0; // Pre-sized continuous frame clip length
-DOOR_SPLINE_LEN   = 133.0; // Pre-sized continuous door clip length
+DOOR_SPLINE_LEN   = 180.0; // Pre-sized continuous door clip length
 
 // --- Peg-Free 60% Flat-Side Wedge Dovetail Dimensions ---
 // Dovetails start at flat side (0%) and span 60% through the frame square

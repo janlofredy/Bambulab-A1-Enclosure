@@ -1,7 +1,6 @@
 // ====================================================================
-// 7. Door Edge with Handle & Draft Flange (Part 7 of 8)
+// 7. Door Edge with Handle (Part 7 of 8)
 // Standardized 138 mm slim door strut with integrated ergonomic pull handle
-// and 8 mm draft-stop overlap lip for the center meeting seam
 // ====================================================================
 include <../config.scad>
 use <../modules/dovetail.scad>
@@ -38,12 +37,6 @@ module door_edge_handle(
             // Subtle concave finger-grip scallop on the pulling side
             translate([is_left_door ? -width/2 - 5 : width/2 + 5, 0, thick/2 + 10])
             cylinder(r = 7.5, h = 32, center = true);
-        }
-        
-        // Draft-stop overlap lip (seals center seam between French doors)
-        if (is_left_door) {
-            translate([width/2 + 4.0, 0, -thick/4])
-            cube([8.0, length, thick/2], center = true);
         }
     }
 }

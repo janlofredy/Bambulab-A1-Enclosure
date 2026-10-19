@@ -83,20 +83,18 @@ module modular_door_leaf(is_left = true) {
             rotate([90, 0, 0])
             door_edge_hinge(is_left_door = is_left);
         }
-        for (i = [3 : 4]) {
-            translate([hinge_x, 0, cw + i*DOOR_EDGE_LEN + DOOR_EDGE_LEN/2])
-            rotate([90, 0, 0])
-            door_edge();
-        }
+        translate([hinge_x, 0, cw + 3*DOOR_EDGE_LEN + DOOR_EDGE_LEN/2])
+        rotate([90, 0, 0])
+        door_edge();
         
         // Inner vertical pillar (handle side)
         center_x = is_left ? dw - pw/2 : pw/2;
-        // Middle segment has handle
+        // Segment 2 has handle (ergonomic height ~500mm)
         translate([center_x, 0, cw + 2*DOOR_EDGE_LEN + DOOR_EDGE_LEN/2])
         rotate([90, 0, 0])
         door_edge_handle(is_left_door = is_left);
         
-        for (i = [0, 1, 3, 4]) {
+        for (i = [0, 1, 3]) {
             translate([center_x, 0, cw + i*DOOR_EDGE_LEN + DOOR_EDGE_LEN/2])
             rotate([90, 0, 0])
             door_edge();
