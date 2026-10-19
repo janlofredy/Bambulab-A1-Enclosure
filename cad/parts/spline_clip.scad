@@ -7,15 +7,20 @@ include <../config.scad>
 use <../modules/spline_profile.scad>
 
 // Pre-sized clips for standard edges (sized to match isolated spline slots)
-module spline_clip_frame() {
-    spline_clip(length = FRAME_SPLINE_LEN, axis = "Y");
+// Oriented flat on the print bed for optimal layer strength and zero supports
+module spline_clip_frame(length = FRAME_SPLINE_LEN) {
+    translate([0, 0, 3.5])
+    rotate([0, 90, 0])
+    spline_clip(length = length, axis = "Y");
 }
 
-module spline_clip_door() {
-    spline_clip(length = DOOR_SPLINE_LEN, axis = "Y");
+module spline_clip_door(length = DOOR_SPLINE_LEN) {
+    translate([0, 0, 3.5])
+    rotate([0, 90, 0])
+    spline_clip(length = length, axis = "Y");
 }
 
-// Print bed batch plate (4 clips laid flat on bed at Z=0)
+// Optional multi-clip batch plate for printing multiple clips in one job
 module spline_clip_batch(count = 4, length = FRAME_SPLINE_LEN) {
     for (i = [0 : count - 1]) {
         translate([i * 12 - ((count-1)*12)/2, 0, 3.5])
@@ -24,5 +29,6 @@ module spline_clip_batch(count = 4, length = FRAME_SPLINE_LEN) {
     }
 }
 
-// Default preview: 4 frame clips
-spline_clip_batch();
+// Default: 1 single standardized frame clip
+spline_clip_frame();
+

@@ -23,7 +23,8 @@ PARTS_MANIFEST = [
     ("8_door_edge_hinge.stl", "cad/parts/door_edge_hinge.scad", None),
     
     # Cellophane Retention
-    ("9_spline_clip_batch.stl", "cad/parts/spline_clip.scad", "spline_clip_batch()"),
+    ("9_spline_clip.stl", "cad/parts/spline_clip.scad", None),
+    ("9_spline_clip_batch_4x.stl", "cad/parts/spline_clip.scad", "spline_clip_batch()"),
     
     # Test Coupons
     ("test_dovetail_coupon.stl", "cad/tests/dovetail_test_coupon.scad", None),

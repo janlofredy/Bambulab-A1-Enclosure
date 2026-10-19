@@ -10,4 +10,5 @@ Thumbs.db
 # Slicer / temporary outputs
 *.gcode
 *.3mf.bak
+*.stl
 stl_exports/
