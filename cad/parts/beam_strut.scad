@@ -37,18 +37,17 @@ module beam_segment(
         // Female Dovetail Socket at -Y end if not male
         if (!end1_male) {
             translate([0, -length/2, 0])
-            rotate([0, 0, 90])
+            rotate([0, 0, 180])
             female_dovetail_pocket(w = width, h = height);
         }
         
         // Female Dovetail Socket at +Y end if not male
         if (!end2_male) {
             translate([0, length/2, 0])
-            rotate([0, 0, -90])
             female_dovetail_pocket(w = width, h = height);
         }
         
-        // Internal weight reduction chamfers/channel through core
+        // Internal weight reduction channel through core
         rotate([90, 0, 0])
         cylinder(d = 10, h = length - (DOVETAIL_DEPTH * 2 + 10), center = true);
     }
@@ -56,14 +55,13 @@ module beam_segment(
     // Male Dovetail Tenon at -Y end
     if (end1_male) {
         translate([0, -length/2, 0])
-        rotate([0, 0, 90])
+        rotate([0, 0, 180])
         male_dovetail(w = width, h = height);
     }
     
     // Male Dovetail Tenon at +Y end
     if (end2_male) {
         translate([0, length/2, 0])
-        rotate([0, 0, -90])
         male_dovetail(w = width, h = height);
     }
 }

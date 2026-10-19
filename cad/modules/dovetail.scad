@@ -1,102 +1,96 @@
 // ====================================================================
-// Dovetail Interlock & Tapered Locking Pin Module
-// Hardware-free rigid joint system for modular 3D printed beams
+// Dual-Taper Wedge Dovetail Module (Peg-Free, Self-Locking)
+// Hardware-free, pin-free rigid joint system with angled wedge flaps
 // ====================================================================
 include <../config.scad>
 
-// 2D Profile of Tapered Dovetail (centered at origin, extending in +Y direction)
-module dovetail_profile_2d(base_w, tip_w, depth, offset_val=0) {
-    w1 = (base_w / 2) + offset_val;
-    w2 = (tip_w / 2) + offset_val;
-    polygon(points=[
-        [-w2, 0],
-        [-w1, depth],
-        [ w1, depth],
-        [ w2, 0]
+// 2D Profile of Dovetail Slice in X-Y plane
+module dovetail_slice_2d(root_w, tip_w, depth) {
+    w_r = root_w / 2;
+    w_t = tip_w / 2;
+    polygon(points = [
+        [-w_r, 0],
+        [-w_t, depth],
+        [ w_t, depth],
+        [ w_r, 0]
     ]);
 }
 
-// 3D Male Dovetail Tenon (extruded along Z, projects in +X or +Z depending on usage)
+// 3D Male Wedge Dovetail Tenon (Projects in +Y direction)
+// Dual-taper: Flared horizontally to prevent pull-out,
+// angled vertically so it slides in easily and wedges rock-solid at the bottom.
 module male_dovetail(
     w = BEAM_WIDTH,
     h = BEAM_HEIGHT,
     depth = DOVETAIL_DEPTH,
     tol = 0
 ) {
-    difference() {
-        translate([0, -depth, 0])
-        rotate([0, 0, 90])
-        linear_extrude(height = h - 2*tol, center = true) {
-            dovetail_profile_2d(
-                base_w = DOVETAIL_BASE_W - 2*tol,
-                tip_w  = DOVETAIL_TIP_W  - 2*tol,
-                depth  = depth
-            );
+    z_bot = -h/2 + 2.0 + tol; // 2mm bottom ledge
+    z_top =  h/2 - tol;       // Flush at top of beam
+    
+    // Bottom dimensions (narrower for easy drop-in entry)
+    b_root = 7.5 - 2*tol;
+    b_tip  = 13.5 - 2*tol;
+    
+    // Top dimensions (wider for firm wedge lock)
+    t_root = 9.5 - 2*tol;
+    t_tip  = 16.5 - 2*tol;
+    
+    union() {
+        // Continuous 3D dual-taper wedge body
+        hull() {
+            translate([0, 0, z_bot])
+            linear_extrude(height = 0.5)
+            dovetail_slice_2d(b_root, b_tip, depth);
+            
+            translate([0, 0, z_top - 0.5])
+            linear_extrude(height = 0.5)
+            dovetail_slice_2d(t_root, t_tip, depth);
         }
         
-        // Transverse locking pin hole (tapered)
-        translate([0, -depth/2, 0])
-        rotate([90, 0, 0])
-        cylinder(
-            r1 = (PIN_HOLE_DIA / 2) - 0.2,
-            r2 = (PIN_HOLE_DIA / 2) + 0.2,
-            h  = w + 10,
-            center = true
-        );
+        // Small positive snap detent bead on the tip face at the bottom
+        // Gives a tactile "click" when fully seated
+        translate([0, depth, z_bot + 2.0])
+        rotate([0, 90, 0])
+        cylinder(r = 0.6, h = b_tip - 2, center = true);
     }
 }
 
-// 3D Female Dovetail Pocket (cut into beam end)
+// 3D Female Wedge Dovetail Pocket (Recesses in -Y direction)
+// Open at the top for effortless drop-in assembly
 module female_dovetail_pocket(
     w = BEAM_WIDTH,
     h = BEAM_HEIGHT,
     depth = DOVETAIL_DEPTH,
     tol = TOL_DOVETAIL
 ) {
-    union() {
-        translate([0, -0.01, 0])
-        rotate([0, 0, 90])
-        linear_extrude(height = h + 2*tol, center = true) {
-            dovetail_profile_2d(
-                base_w = DOVETAIL_BASE_W + 2*tol,
-                tip_w  = DOVETAIL_TIP_W  + 2*tol,
-                depth  = depth + 0.5
-            );
-        }
-        
-        // Transverse locking pin hole through the surrounding walls
-        translate([0, depth/2, 0])
-        rotate([90, 0, 0])
-        cylinder(
-            r1 = (PIN_HOLE_DIA / 2) - 0.2,
-            r2 = (PIN_HOLE_DIA / 2) + 0.2,
-            h  = w + 10,
-            center = true
-        );
-    }
-}
-
-// Tapered Locking Wedge Pin
-module locking_taper_pin(
-    pin_len = BEAM_WIDTH + 6,
-    dia = PIN_HOLE_DIA,
-    taper = PIN_TAPER_ANGLE
-) {
-    r_mid = dia / 2 - TOL_DOVETAIL;
-    delta_r = (pin_len / 2) * tan(taper / 2);
-    r1 = r_mid - delta_r;
-    r2 = r_mid + delta_r;
+    z_bot = -h/2 + 2.0 - tol;
+    z_top =  h/2 + 2.0; // Open through top
+    
+    // Bottom pocket dimensions (with tolerance)
+    b_root = 7.5 + 2*tol;
+    b_tip  = 13.5 + 2*tol;
+    
+    // Top pocket dimensions (with tolerance)
+    t_root = 9.5 + 2*tol;
+    t_tip  = 16.5 + 2*tol;
     
     union() {
-        // Tapered locking shaft
-        cylinder(r1 = r1, r2 = r2, h = pin_len, center = true);
-        
-        // Ergonomic pull-tab head for tool-free insertion & removal
-        translate([0, 0, pin_len / 2])
+        // Dual-taper wedge pocket recessed into -Y
+        mirror([0, 1, 0])
         hull() {
-            cylinder(r = r2 + 2.5, h = 3.5, center = false);
-            translate([0, 0, 5])
-            cube([2.5, (r2 + 2.5)*2, 0.1], center = true);
+            translate([0, 0, z_bot])
+            linear_extrude(height = 0.5)
+            dovetail_slice_2d(b_root, b_tip, depth + 0.6);
+            
+            translate([0, 0, z_top])
+            linear_extrude(height = 0.5)
+            dovetail_slice_2d(t_root, t_tip, depth + 0.6);
         }
+        
+        // Matching snap detent groove at the bottom of the pocket
+        translate([0, -(depth), z_bot + 2.0])
+        rotate([0, 90, 0])
+        cylinder(r = 0.8, h = b_tip + 2, center = true);
     }
 }

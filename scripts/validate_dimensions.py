@@ -62,7 +62,6 @@ def main():
         ("Door Horizontal Rails (Segmented)", ((params.get("INTERNAL_WIDTH", 560)/2) - 32) / 2, 16, 16),
         ("Roof Door Depth Segments", params.get("INTERNAL_DEPTH", 580)/3, 16, 16),
         ("Roof Heat-Dissipation Prop Leg", 135, 12, 6),
-        ("Locking Wedge Pin", 30, 8, 8),
         ("Snap-in Spline Clips (Max)", 220, 4.5, 6),
     ]
     

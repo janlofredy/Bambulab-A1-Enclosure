@@ -30,17 +30,16 @@ module bottom_corner(is_front = true, is_left = true) {
         rotate([0, -90, 0])
         spline_groove_negative(length = cs + 2, axis = "Y");
         
-        // Female Dovetail Socket for X Beam (+X face)
+        // Female Dovetail Socket for X Beam (+X face, recesses into -X)
         translate([cs, bw/2, bh/2])
-        rotate([0, 0, 180])
-        female_dovetail_pocket(w = bw, h = bh);
-        
-        // Female Dovetail Socket for Y Beam (+Y face)
-        translate([bw/2, cs, bh/2])
         rotate([0, 0, -90])
         female_dovetail_pocket(w = bw, h = bh);
         
-        // Female Dovetail Socket for Vertical Z Pillar (+Z face)
+        // Female Dovetail Socket for Y Beam (+Y face, recesses into -Y)
+        translate([bw/2, cs, bh/2])
+        female_dovetail_pocket(w = bw, h = bh);
+        
+        // Female Dovetail Socket for Vertical Z Pillar (+Z face, recesses downward into -Z)
         translate([bw/2, bh/2, cs])
         rotate([90, 0, 0])
         female_dovetail_pocket(w = bw, h = bh);

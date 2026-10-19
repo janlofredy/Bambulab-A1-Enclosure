@@ -9,8 +9,8 @@ An ultra-clean, hardware-free modular 3D printable enclosure tailored specifical
 
 1. **Fits 100% on the Bambu Lab A1 Build Plate**:
    - Every single beam segment, corner node, door frame, and clip is $\le 237\text{ mm}$ (comfortably within the $256 \times 256 \times 256\text{ mm}$ build envelope).
-2. **100% Hardware-Free Joint System**:
-   - Assembles entirely using **self-aligning tapered dovetails** and **transverse locking wedge pins**. No screws, nuts, or glue required.
+2. **Peg-Free Self-Locking Joint System**:
+   - Assembles with **dual-taper angled flap dovetails** and **tactile snap-detents**. No screws, no nuts, no glue, and **zero pins or pegs** required! Beams simply drop in from above and wedge rock-solid under friction.
 3. **Packaging Cellophane Retention**:
    - Continuous U-channel grooves along every strut and door frame allow you to lay the packaging plastic flat and lock it taut using **snap-in spline clips** with zero tearing.
 4. **Kinematic Clearances for Bed-Slinger A1**:
@@ -63,19 +63,19 @@ Bambulab A1 Enclosure/
 
 ### Step 1: Test Print Coupons (Verify Fit & Tolerances)
 Before printing full beams, print the two small test coupons on your A1:
-1. `cad/tests/dovetail_test_coupon.scad` (~25 min):
-   - Slide the male tenon into the female pocket.
-   - Insert the tapered locking pin. It should wedge firmly by hand or with a light tap, eliminating all joint wiggle.
+1. `cad/tests/dovetail_test_coupon.scad` (~15 min):
+   - Drop the male tenon into the female open-top pocket.
+   - Press down with your thumb. The angled flaps should wedge tightly, and the bottom bead should snap into the floor groove with a positive click.
 2. `cad/tests/spline_test_coupon.scad` (~15 min):
    - Place a piece of your printer's packaging cellophane over the groove.
    - Press the spline clip down into the groove with your thumbs. The plastic should snap in and stretch drum-tight.
 
 ### Step 2: Assemble the Bottom Base Perimeter
 1. Lay out the 4 **Bottom Corner Blocks** (`cad/parts/corner_bottom.scad`) on your desk.
-2. Connect the **Front & Rear X-Beams** using 3 interlocking segments per span.
-3. Connect the **Left & Right Y-Beams** using 3 interlocking segments per span.
+2. Connect the **Front & Rear X-Beams** by dropping the male wedge dovetails into the corner and intermediate sockets.
+3. Connect the **Left & Right Y-Beams** into their sockets.
    - *Note*: Insert the **4-Tube PTFE Entry Beam** (`cad/modules/ptfe_mount.scad`) on your preferred side (left or right lower side beam).
-4. Lock all dovetail joints by pushing the **Tapered Locking Wedge Pins** (`cad/parts/dovetail_pin.scad`) into each joint.
+4. Press each joint down firmly until the angled flaps wedge flush and the bottom detents snap in tight. Zero pins needed!
 
 ### Step 3: Erect Vertical Pillars & Top Ring
 1. Slot 3 vertical beam segments together into each of the 4 corner sockets to form the 4 corner pillars.

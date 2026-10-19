@@ -22,18 +22,18 @@ All components are designed to print without supports on a standard **Bambu Lab 
 | :--- | :--- | :---: | :---: | :--- |
 | **Dovetail Test Coupon** | `cad/tests/dovetail_test_coupon.scad` | 1 | 25 min | **Print 1st**: Verifies dovetail slide & pin tightness |
 | **Spline Test Coupon** | `cad/tests/spline_test_coupon.scad` | 1 | 15 min | **Print 2nd**: Tests cellophane clamping with shipping bag |
-| **Bottom Corner Blocks** | `cad/parts/corner_bottom.scad` | 4 | ~1 hr 40 min | 4 corner nodes (print together on 1 plate) |
+| **Bottom Corner Blocks** | `cad/parts/corner_bottom.scad` | 4 | ~1 hr 40 min | 4 corner nodes with wedge sockets (1 plate) |
 | **Top Corner Blocks** | `cad/parts/corner_top.scad` | 4 | ~1 hr 50 min | With door and roof hinge knuckles |
 | **X-Span Beams (Front/Back)** | `cad/parts/beam_strut.scad` | 8 | ~3 hr 30 min | 4x `beam_x_mid`, 4x `beam_x_end` (width span) |
 | **Y-Span Beams (Sides)** | `cad/parts/beam_strut.scad` | 7 | ~3 hr 15 min | 3x `beam_y_mid`, 4x `beam_y_end` (depth span) |
 | **4-Tube PTFE Bottom Beam** | `cad/modules/ptfe_mount.scad` | 1 | ~50 min | Replaces 1 bottom side Y-beam segment |
 | **Z-Span Vertical Pillars** | `cad/parts/beam_strut.scad` | 12 | ~5 hr 20 min | 4 corners × 3 vertical segments (height span) |
-| **Locking Taper Pins** | `cad/parts/dovetail_pin.scad` | 36 | ~1 hr 10 min | Printed in 3 batch plates of 12 |
 | **Front Door Frames** | `cad/parts/front_door.scad` | 2 sets | ~3 hr 45 min | 6 vertical stiles, 4 horizontal rail halves |
 | **Door Handle & Latches** | `cad/parts/front_door.scad` | 2 | ~35 min | Dual snap-latches and pull handles |
 | **Top Roof Doors** | `cad/parts/top_roof_door.scad` | 2 sets | ~3 hr 20 min | 6 depth stiles, 4 cross rails |
 | **Roof Prop Legs (Kickstands)**| `cad/parts/top_roof_door.scad` | 2 | ~40 min | Multi-angle heat dissipation prop legs |
 | **Snap-in Spline Clips** | `cad/parts/spline_clip.scad` | ~30 | ~2 hr 30 min | Tension clips for cellophane sheets |
+| **Joint Hardware / Pegs** | *N/A (Peg-Free)* | **0** | **0 min** | **Self-locking dual-taper angled flaps!** |
 
 ---
 
