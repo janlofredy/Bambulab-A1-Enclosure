@@ -6,6 +6,7 @@
 // ====================================================================
 include <../config.scad>
 use <../modules/dovetail.scad>
+use <../modules/spline_profile.scad>
 
 module corner_part() {
     cs = CORNER_SIZE;
@@ -41,6 +42,37 @@ module corner_part() {
         translate([bw/2, cs, bh/2])
         rotate([180, 90, 0])
         female_dovetail_pocket(w = bw, h = bh);
+        
+        // --- Continuous Spline Grooves on Outside Faces ---
+        // 1. Arm +X: spline on Y=0 face (Front outside face)
+        translate([cs/2, 0, bh/2])
+        rotate([0, 90, 270])
+        spline_groove_negative(length = cs + 2, axis = "Y");
+        
+        // 2. Arm +X: spline on Z=0 face (Bottom outside face)
+        translate([cs/2, bw/2, 0])
+        rotate([0, 180, 270])
+        spline_groove_negative(length = cs + 2, axis = "Y");
+        
+        // 3. Arm +Y: spline on X=0 face (Left outside face)
+        translate([0, cs/2, bh/2])
+        rotate([0, 270, 0])
+        spline_groove_negative(length = cs + 2, axis = "Y");
+        
+        // 4. Arm +Y: spline on Z=0 face (Bottom outside face)
+        translate([bw/2, cs/2, 0])
+        rotate([0, 180, 0])
+        spline_groove_negative(length = cs + 2, axis = "Y");
+        
+        // 5. Arm +Z: spline on X=0 face (Left outside face)
+        translate([0, bw/2, cs/2])
+        rotate([90, 0, 270])
+        spline_groove_negative(length = cs + 2, axis = "Y");
+        
+        // 6. Arm +Z: spline on Y=0 face (Front outside face)
+        translate([bw/2, 0, cs/2])
+        rotate([90, 0, 0])
+        spline_groove_negative(length = cs + 2, axis = "Y");
         
         // Rubber bumper foot recess on bottom face (-Z)
         translate([bw/2, bw/2, 0])
