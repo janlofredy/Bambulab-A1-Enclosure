@@ -17,13 +17,14 @@ module ptfe_entry_beam(
         // Base Beam Body
         cube([width, length, height], center = true);
         
-        // Spline groove on bottom & outer side
+        // Spline groove on bottom (-Z) & outer side (+X)
         translate([0, 0, -height/2])
-        spline_groove_negative(length = length + 2);
+        rotate([180, 0, 0])
+        spline_groove_negative(length = length + 2, axis = "Y");
         
         translate([width/2, 0, 0])
         rotate([0, 90, 0])
-        spline_groove_negative(length = length + 2);
+        spline_groove_negative(length = length + 2, axis = "Y");
         
         // Female dovetail pocket at -Y end
         translate([0, -length/2, 0])

@@ -22,11 +22,12 @@ module spline_clip_short() {
     spline_clip(length = 100);
 }
 
-// Print array of 4 clips side-by-side
+// Print array of clips side-by-side on the build plate (Z=0)
 module spline_clip_array(count = 4, length = 150) {
     for (i = [0 : count - 1]) {
-        translate([0, i * 14, 0])
-        spline_clip(length = length);
+        translate([i * 12 - ((count-1)*12)/2, 0, 3.4])
+        rotate([0, 90, 0])
+        spline_clip(length = length, axis = "Y");
     }
 }
 

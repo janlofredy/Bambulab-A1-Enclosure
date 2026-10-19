@@ -21,13 +21,14 @@ module bottom_corner(is_front = true, is_left = true) {
         cube([cs, cs, cs], center = false);
         
         // Spline groove on bottom face (-Z)
-        translate([cs/2, cs/2, 0])
-        spline_groove_negative(length = cs + 2);
+        translate([bw/2, cs/2, 0])
+        rotate([180, 0, 0])
+        spline_groove_negative(length = cs + 2, axis = "Y");
         
-        // Spline groove on outer faces
-        translate([0, cs/2, cs/2])
-        rotate([0, 90, 0])
-        spline_groove_negative(length = cs + 2);
+        // Spline groove on outer side face (-X)
+        translate([0, cs/2, bh/2])
+        rotate([0, -90, 0])
+        spline_groove_negative(length = cs + 2, axis = "Y");
         
         // Female Dovetail Socket for X Beam (+X face)
         translate([cs, bw/2, bh/2])

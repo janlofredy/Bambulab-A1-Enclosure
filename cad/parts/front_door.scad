@@ -33,9 +33,9 @@ module door_rail(length = (DOOR_WIDTH - 2*FRAME_THICK) / 2) {
         cube([length, FRAME_THICK, FRAME_DEPTH], center = true);
         
         // Spline groove facing inward for cellophane panel
-        translate([0, 0, 0])
-        rotate([0, 90, 0])
-        spline_groove_negative(length = length + 2);
+        translate([0, FRAME_THICK/2, 0])
+        rotate([90, 0, 0])
+        spline_groove_negative(length = length + 2, axis = "X");
         
         // Female joint at one end
         translate([-length/2, 0, 0])
@@ -62,10 +62,10 @@ module door_stile_segment(length = DOOR_HEIGHT / 3, is_hinge_segment = false) {
             }
         }
         
-        // Spline groove facing inward
+        // Spline groove facing inward (+X face)
         translate([FRAME_THICK/2, 0, 0])
-        rotate([90, 0, 0])
-        spline_groove_negative(length = length + 2);
+        rotate([0, 90, 0])
+        spline_groove_negative(length = length + 2, axis = "Y");
         
         // Female joint at bottom
         translate([0, -length/2, 0])

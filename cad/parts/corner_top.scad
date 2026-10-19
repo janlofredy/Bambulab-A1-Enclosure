@@ -36,8 +36,8 @@ module top_corner(is_front = true, is_left = true) {
         cube([cs, cs, cs - bh], center = false);
         
         // Spline groove on top face (+Z)
-        translate([cs/2, cs/2, cs])
-        spline_groove_negative(length = cs + 2);
+        translate([bw/2, cs/2, cs])
+        spline_groove_negative(length = cs + 2, axis = "Y");
         
         // Female Dovetail Socket for X Beam (+X face)
         translate([cs, bw/2, cs - bh/2])

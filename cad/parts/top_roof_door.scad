@@ -30,8 +30,8 @@ module roof_stile_segment(length = ROOF_DOOR_DEPTH / 3, is_hinge = false) {
         
         // Spline groove for top cellophane panel facing inward (+X)
         translate([ROOF_FRAME_W/2, 0, 0])
-        rotate([90, 0, 0])
-        spline_groove_negative(length = length + 2);
+        rotate([0, 90, 0])
+        spline_groove_negative(length = length + 2, axis = "Y");
         
         // Female joint at -Y end
         translate([0, -length/2, 0])
@@ -52,8 +52,8 @@ module roof_center_stile(length = ROOF_DOOR_DEPTH / 3) {
         
         // Spline groove facing inward (-X)
         translate([-ROOF_FRAME_W/2, 0, 0])
-        rotate([90, 0, 0])
-        spline_groove_negative(length = length + 2);
+        rotate([0, -90, 0])
+        spline_groove_negative(length = length + 2, axis = "Y");
         
         // Female joint at -Y end
         translate([0, -length/2, 0])
