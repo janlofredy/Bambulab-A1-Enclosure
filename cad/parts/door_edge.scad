@@ -17,10 +17,10 @@ module door_edge(
         // Main door frame strut body
         cube([width, length, thick], center = true);
         
-        // Spline groove on FRONT (+Z) face along Y axis
-        // Uses DOOR_SPLINE_LEN so mini-dovetails (8mm) do not reach the spline slots
+        // Spline groove on FRONT (+Z) face along Y axis - continuous full length
+        // Mini-dovetails start at flat back face and only go 60% through, leaving front 30% spline zone untouched
         translate([0, 0, thick/2])
-        spline_groove_negative(length = DOOR_SPLINE_LEN, axis = "Y");
+        spline_groove_negative(length = length + 2, axis = "Y");
         
         // Mini female open-top wedge pocket at -Y end
         translate([0, -length/2, 0])

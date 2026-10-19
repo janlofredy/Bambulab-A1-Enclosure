@@ -17,7 +17,10 @@ module dovetail_slice_2d(root_w, tip_w, depth) {
 }
 
 // ----------------------------------------------------
+// ----------------------------------------------------
 // 1. Main Frame Dual-Taper Wedge Dovetail (24 x 24 mm Profile)
+// Starts at flat side (0%) and spans 60% through the frame square
+// Leaves the outer 40% (which carries the 30% slot & spline) completely solid
 // ----------------------------------------------------
 module male_dovetail(
     w = BEAM_WIDTH,
@@ -25,29 +28,34 @@ module male_dovetail(
     depth = DOVETAIL_DEPTH,
     tol = 0
 ) {
-    z_bot = -h/2 + 2.0 + tol; // 2mm bottom ledge
-    z_top =  h/2 - tol;       // Flush at top of beam
+    // Starts at flat side (-h/2) and goes 60% through
+    z_start = -h/2 + tol;
+    z_end   = -h/2 + 0.60 * h - tol;
     
-    b_root = FRAME_BOT_ROOT - 2*tol;
-    b_tip  = FRAME_BOT_TIP  - 2*tol;
-    t_root = FRAME_TOP_ROOT - 2*tol;
-    t_tip  = FRAME_TOP_TIP  - 2*tol;
+    // Shift slightly toward flat side in X (-w/2) so it stays clear of +X spline as well
+    x_off = -2.5;
     
+    b_root = 6.0 - 2*tol;
+    b_tip  = 9.5 - 2*tol;
+    t_root = 8.0 - 2*tol;
+    t_tip  = 12.0 - 2*tol;
+    
+    translate([x_off, 0, 0])
     union() {
         hull() {
-            translate([0, 0, z_bot])
+            translate([0, 0, z_start])
             linear_extrude(height = 0.5)
             dovetail_slice_2d(b_root, b_tip, depth);
             
-            translate([0, 0, z_top - 0.5])
+            translate([0, 0, z_end - 0.5])
             linear_extrude(height = 0.5)
             dovetail_slice_2d(t_root, t_tip, depth);
         }
         
-        // Tactile snap detent bead on the tip face at the bottom
-        translate([0, depth, z_bot + 2.0])
+        // Tactile snap detent bead near the 60% internal shoulder
+        translate([0, depth, z_end - 2.5])
         rotate([0, 90, 0])
-        cylinder(r = 0.6, h = b_tip - 2, center = true);
+        cylinder(r = 0.6, h = t_tip - 2, center = true, $fn=16);
     }
 }
 
@@ -57,35 +65,40 @@ module female_dovetail_pocket(
     depth = DOVETAIL_DEPTH,
     tol = TOL_DOVETAIL
 ) {
-    z_bot = -h/2 + 2.0 - tol;
-    z_top =  h/2 + 2.0; // Open through top
+    // Starts at flat side (-h/2, open) and goes 60% through
+    z_start = -h/2 - 1.0;
+    z_end   = -h/2 + 0.60 * h + tol;
     
-    b_root = FRAME_BOT_ROOT + 2*tol;
-    b_tip  = FRAME_BOT_TIP  + 2*tol;
-    t_root = FRAME_TOP_ROOT + 2*tol;
-    t_tip  = FRAME_TOP_TIP  + 2*tol;
+    x_off = -2.5;
     
+    b_root = 6.0 + 2*tol;
+    b_tip  = 9.5 + 2*tol;
+    t_root = 8.0 + 2*tol;
+    t_tip  = 12.0 + 2*tol;
+    
+    translate([x_off, 0, 0])
     union() {
         mirror([0, 1, 0])
         hull() {
-            translate([0, 0, z_bot])
+            translate([0, 0, z_start])
             linear_extrude(height = 0.5)
             dovetail_slice_2d(b_root, b_tip, depth + 0.6);
             
-            translate([0, 0, z_top])
+            translate([0, 0, z_end - 0.5])
             linear_extrude(height = 0.5)
             dovetail_slice_2d(t_root, t_tip, depth + 0.6);
         }
         
-        // Matching snap detent groove in the pocket floor
-        translate([0, -depth, z_bot + 2.0])
+        // Matching snap detent groove in pocket floor near 60% ceiling
+        translate([0, -depth, z_end - 2.5])
         rotate([0, 90, 0])
-        cylinder(r = 0.8, h = b_tip + 2, center = true);
+        cylinder(r = 0.8, h = t_tip + 2, center = true, $fn=16);
     }
 }
 
 // ----------------------------------------------------
 // 2. Mini Door Dual-Taper Wedge Dovetail (18 x 16 mm Profile)
+// Starts at flat side (0%) and spans 60% through
 // ----------------------------------------------------
 module mini_male_dovetail(
     w = DOOR_PROFILE_W,
@@ -93,29 +106,29 @@ module mini_male_dovetail(
     depth = DOOR_DEPTH,
     tol = 0
 ) {
-    z_bot = -h/2 + 1.5 + tol;
-    z_top =  h/2 - tol;
+    z_start = -h/2 + tol;
+    z_end   = -h/2 + 0.60 * h - tol;
     
-    b_root = DOOR_BOT_ROOT - 2*tol;
-    b_tip  = DOOR_BOT_TIP  - 2*tol;
-    t_root = DOOR_TOP_ROOT - 2*tol;
-    t_tip  = DOOR_TOP_TIP  - 2*tol;
+    b_root = 5.0 - 2*tol;
+    b_tip  = 8.0 - 2*tol;
+    t_root = 6.5 - 2*tol;
+    t_tip  = 10.0 - 2*tol;
     
     union() {
         hull() {
-            translate([0, 0, z_bot])
+            translate([0, 0, z_start])
             linear_extrude(height = 0.5)
             dovetail_slice_2d(b_root, b_tip, depth);
             
-            translate([0, 0, z_top - 0.5])
+            translate([0, 0, z_end - 0.5])
             linear_extrude(height = 0.5)
             dovetail_slice_2d(t_root, t_tip, depth);
         }
         
-        // Snap detent bead
-        translate([0, depth, z_bot + 1.5])
+        // Snap detent bead near 60% shoulder
+        translate([0, depth, z_end - 2.0])
         rotate([0, 90, 0])
-        cylinder(r = 0.5, h = b_tip - 1.5, center = true);
+        cylinder(r = 0.5, h = t_tip - 1.5, center = true, $fn=16);
     }
 }
 
@@ -125,29 +138,29 @@ module mini_female_dovetail_pocket(
     depth = DOOR_DEPTH,
     tol = TOL_DOVETAIL
 ) {
-    z_bot = -h/2 + 1.5 - tol;
-    z_top =  h/2 + 2.0; // Open through top
+    z_start = -h/2 - 1.0;
+    z_end   = -h/2 + 0.60 * h + tol;
     
-    b_root = DOOR_BOT_ROOT + 2*tol;
-    b_tip  = DOOR_BOT_TIP  + 2*tol;
-    t_root = DOOR_TOP_ROOT + 2*tol;
-    t_tip  = DOOR_TOP_TIP  + 2*tol;
+    b_root = 5.0 + 2*tol;
+    b_tip  = 8.0 + 2*tol;
+    t_root = 6.5 + 2*tol;
+    t_tip  = 10.0 + 2*tol;
     
     union() {
         mirror([0, 1, 0])
         hull() {
-            translate([0, 0, z_bot])
+            translate([0, 0, z_start])
             linear_extrude(height = 0.5)
             dovetail_slice_2d(b_root, b_tip, depth + 0.5);
             
-            translate([0, 0, z_top])
+            translate([0, 0, z_end - 0.5])
             linear_extrude(height = 0.5)
             dovetail_slice_2d(t_root, t_tip, depth + 0.5);
         }
         
         // Matching detent groove
-        translate([0, -depth, z_bot + 1.5])
+        translate([0, -depth, z_end - 2.0])
         rotate([0, 90, 0])
-        cylinder(r = 0.7, h = b_tip + 2, center = true);
+        cylinder(r = 0.7, h = t_tip + 2, center = true, $fn=16);
     }
 }

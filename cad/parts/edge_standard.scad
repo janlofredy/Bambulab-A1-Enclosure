@@ -23,18 +23,18 @@ module edge_standard(
         // Main solid beam body
         cube([width, length, height], center = true);
         
-        // Spline slot 1 on outside edge (+X face)
-        // Uses FRAME_SPLINE_LEN so dovetails (10mm) do not reach the spline slots
+        // Spline slot 1 on outside edge (+X face) - runs full continuous length
+        // Dovetails start at flat side and only go 60% through, leaving 30% spline zone untouched
         if (spline_x) {
             translate([width/2, 0, 0])
             rotate([0, 90, 0])
-            spline_groove_negative(length = FRAME_SPLINE_LEN, axis = "Y");
+            spline_groove_negative(length = length + 2, axis = "Y");
         }
         
-        // Spline slot 2 on outside edge (+Z face)
+        // Spline slot 2 on outside edge (+Z face) - runs full continuous length
         if (spline_z) {
             translate([0, 0, height/2])
-            spline_groove_negative(length = FRAME_SPLINE_LEN, axis = "Y");
+            spline_groove_negative(length = length + 2, axis = "Y");
         }
         
         // Female open-top wedge pocket at -Y end

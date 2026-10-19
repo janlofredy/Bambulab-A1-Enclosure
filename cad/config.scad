@@ -36,21 +36,21 @@ TOL_HINGE    = 0.30; // Free rotating hinge pins
 TOL_LOOSE    = 0.40; // Clearance gaps
 
 // --- Cellophane Spline Groove Specifications ---
-GROOVE_WIDTH      = 4.5;  // Width of U-channel
-GROOVE_DEPTH      = 4.5;  // Depth of U-channel
-SPLINE_END_MARGIN = 13.0; // Margin from beam ends so dovetails (10mm) never reach spline slots
-FRAME_SPLINE_LEN  = FRAME_EDGE_LEN - 2 * SPLINE_END_MARGIN; // 159 mm central slot
-DOOR_SPLINE_LEN   = DOOR_EDGE_LEN - 2 * 10.0; // 118 mm central slot
+GROOVE_WIDTH      = 4.5;   // Width of U-channel
+GROOVE_DEPTH      = 4.5;   // Depth of U-channel (~20-30% of frame square)
+FRAME_SPLINE_LEN  = 180.0; // Pre-sized continuous frame clip length
+DOOR_SPLINE_LEN   = 133.0; // Pre-sized continuous door clip length
 
-// --- Peg-Free Dual-Taper Wedge Dovetail Dimensions ---
-// Sized so dovetails do not reach or intersect the spline slots
-DOVETAIL_DEPTH = 10.0; // Length of wedge insert (mm) - stays clear of spline slots
+// --- Peg-Free 60% Flat-Side Wedge Dovetail Dimensions ---
+// Dovetails start at flat side (0%) and span 60% through the frame square
+// Leaves the outer 40% (which carries the 30% slot & spline) completely solid
+DOVETAIL_DEPTH = 12.0; // Insertion length of wedge insert (mm)
 
-// Main Frame Wedge Dovetail
-FRAME_BOT_ROOT = 6.5;  // Bottom root width (narrow entry)
-FRAME_BOT_TIP  = 10.5; // Bottom tip width
-FRAME_TOP_ROOT = 8.0;  // Top root width (wide wedge lock)
-FRAME_TOP_TIP  = 12.5; // Top tip width (half-width 6.25mm < 7.5mm spline boundary)
+// Main Frame Wedge Dovetail (spans 60% of 24mm square from flat side)
+FRAME_BOT_ROOT = 6.0;  // Root width at flat entry
+FRAME_BOT_TIP  = 9.5;  // Tip width at flat entry
+FRAME_TOP_ROOT = 8.0;  // Root width at 60% shoulder
+FRAME_TOP_TIP  = 12.0; // Tip width at 60% shoulder (isolated from outside splines)
 
 // Mini Door Wedge Dovetail (scaled for 18x16 mm door profile)
 DOOR_BOT_ROOT  = 5.0;
