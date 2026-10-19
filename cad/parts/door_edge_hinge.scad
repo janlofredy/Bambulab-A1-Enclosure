@@ -13,17 +13,32 @@ module door_edge_hinge(
     length = DOOR_EDGE_LEN,
     width  = DOOR_PROFILE_W,
     thick  = DOOR_PROFILE_T,
-    is_left_door = true
+    is_left_door = undef
 ) {
-    union() {
-        // Base door edge body
-        door_edge(length = length, width = width, thick = thick);
+    barrel_od = 10.0;
+    pin_id = 5.0;
+    knuckle_h = 11.5;
+    tol = TOL_HINGE;
+    
+    // Male knuckle sits at corner (-width/2, -thick/2)
+    kx = -width/2;
+    kz = -thick/2;
+    
+    difference() {
+        union() {
+            // Base door edge body
+            door_edge(length = length, width = width, thick = thick);
+            
+            // Integrated male knuckle barrel
+            translate([kx, 0, kz])
+            rotate([90, 0, 0])
+            cylinder(d = barrel_od - 0.2, h = knuckle_h, center = true, $fn = 32);
+        }
         
-        // Offset male hinge knuckle
-        offset_x = is_left_door ? -width/2 - 4.5 : width/2 + 4.5;
-        translate([offset_x, 0, 0])
+        // Pin through-hole along Y axis
+        translate([kx, 0, kz])
         rotate([90, 0, 0])
-        hinge_male_knuckle();
+        cylinder(d = pin_id + tol, h = knuckle_h + 4, center = true, $fn = 32);
     }
 }
 

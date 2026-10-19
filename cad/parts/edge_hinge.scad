@@ -14,44 +14,38 @@ module edge_hinge(
     length = FRAME_EDGE_LEN,
     width  = BEAM_WIDTH,
     height = BEAM_HEIGHT,
-    is_left_pillar = true
+    has_spline = true,
+    is_left_pillar = undef
 ) {
-    union() {
-        if (is_left_pillar) {
-            // Left pillar:
-            // Side wall spline is on +Z face (maps to global -X)
-            // Front door face is on +X face (maps to global -Y)
-            edge_standard(
-                length = length,
-                width  = width,
-                height = height,
-                has_spline_x = false,
-                has_spline_z = true
-            );
+    barrel_od = 10.0;
+    pin_id = 5.0;
+    knuckle_h = 28.0;
+    center_gap = 12.0;
+    tol = TOL_HINGE;
+    
+    // Knuckle sits at the corner between the +X and +Z spline slots
+    kx = width/2;
+    kz = height/2;
+    
+    difference() {
+        union() {
+            // Base strut with continuous spline slots
+            edge_standard(length = length, width = width, height = height, has_spline = has_spline);
             
-            // Female hinge knuckle on +X face (facing front -Y)
-            // Offset towards the inside door side (-Z face in local, +X in global)
-            translate([width/2 + 2.0, 0, -height/2 + 4.0])
+            // Solid female hinge knuckle at corner
+            translate([kx, 0, kz])
             rotate([90, 0, 0])
-            hinge_female_knuckle();
-        } else {
-            // Right pillar:
-            // Side wall spline is on +X face (maps to global +X)
-            // Front door face is on +Z face (maps to global -Y)
-            edge_standard(
-                length = length,
-                width  = width,
-                height = height,
-                has_spline_x = true,
-                has_spline_z = false
-            );
-            
-            // Female hinge knuckle on +Z face (facing front -Y)
-            // Offset towards the inside door side (-X face in local, -X in global)
-            translate([-width/2 + 4.0, 0, height/2 + 2.0])
-            rotate([90, 0, 0])
-            hinge_female_knuckle();
+            cylinder(d = barrel_od, h = knuckle_h, center = true, $fn = 32);
         }
+        
+        // Center pocket cutout for male knuckle
+        translate([kx, 0, kz])
+        cube([barrel_od + 4, center_gap + 2*tol, barrel_od + 4], center = true);
+        
+        // Pin hole along Y axis
+        translate([kx, 0, kz])
+        rotate([90, 0, 0])
+        cylinder(d = pin_id + tol, h = knuckle_h + 4, center = true, $fn = 32);
     }
 }
 
