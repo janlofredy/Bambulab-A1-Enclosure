@@ -98,5 +98,30 @@ module beam_z_end() {
     beam_segment(length = SEG_LEN_Z, end1_male = true, end2_male = true);
 }
 
+// Front Bottom/Top Beams (Smooth front face - no spline grooves blocking doors)
+module beam_front_x_mid() {
+    beam_segment(length = SEG_LEN_X, end1_male = true, end2_male = false, has_spline_outer = false);
+}
+
+module beam_front_x_end() {
+    beam_segment(length = SEG_LEN_X, end1_male = true, end2_male = true, has_spline_outer = false);
+}
+
+// Front Vertical Corner Pillars (With integrated female door hinge knuckles)
+module pillar_front_z(is_left = true, has_hinge = true) {
+    difference() {
+        union() {
+            beam_segment(length = SEG_LEN_Z, end1_male = true, end2_male = false, has_spline_outer = false);
+            
+            // Integrated female hinge knuckle on front face
+            if (has_hinge) {
+                translate([is_left ? -BEAM_WIDTH/2 : BEAM_WIDTH/2, 0, 0])
+                rotate([90, 0, 0])
+                hinge_female_knuckle();
+            }
+        }
+    }
+}
+
 // Preview default
-beam_x_mid();
+beam_front_x_mid();
