@@ -1,238 +1,226 @@
 // ====================================================================
-// Bambu Lab A1 Enclosure - Full Digital 3D Assembly Preview
-// Shows full frame, cellophane walls, front French doors, proppable roof,
-// bottom 4-tube PTFE routing, and printer kinematics envelope
+// Bambu Lab A1 Enclosure - Digital Twin Assembly Preview
+// Ultra-Minimal 8-Part Kit (Face-Overlay Architecture)
+// Composed exclusively from the 8 standardized parts:
+//   Frame: corner_part, edge_standard, edge_hinge, edge_ptfe
+//   Doors: door_corner, door_edge, door_edge_handle, door_edge_hinge
 // ====================================================================
 include <config.scad>
-use <modules/dovetail.scad>
-use <modules/spline_profile.scad>
-use <modules/hinge.scad>
-use <modules/ptfe_mount.scad>
-use <parts/corner_bottom.scad>
-use <parts/corner_top.scad>
-use <parts/beam_strut.scad>
-use <parts/front_door.scad>
-use <parts/top_roof_door.scad>
+use <parts/corner_part.scad>
+use <parts/edge_standard.scad>
+use <parts/edge_hinge.scad>
+use <parts/edge_ptfe.scad>
+use <parts/door_corner.scad>
+use <parts/door_edge.scad>
+use <parts/door_edge_handle.scad>
+use <parts/door_edge_hinge.scad>
 
-// Color Palette for Visual Inspection
-COLOR_FRAME    = [0.25, 0.28, 0.32, 1.0]; // Dark Industrial Gray
-COLOR_CORNERS  = [0.85, 0.45, 0.10, 1.0]; // Bambu Orange accents
-COLOR_DOORS    = [0.30, 0.65, 0.90, 0.9]; // Cyan Door Frames
-COLOR_PLASTIC  = [0.85, 0.95, 1.00, 0.25]; // Translucent Cellophane Film
+// Palette
+COLOR_FRAME    = [0.25, 0.28, 0.32, 1.0]; // Dark Slate Frame
+COLOR_CORNERS  = [0.90, 0.45, 0.10, 1.0]; // Orange Corner Blocks
+COLOR_PTFE     = [0.10, 0.75, 0.50, 1.0]; // Emerald PTFE Entry
+COLOR_DOORS    = [0.20, 0.65, 0.90, 0.95]; // Cyan Face-Overlay Doors
+COLOR_PLASTIC  = [0.85, 0.95, 1.00, 0.22]; // Translucent Cellophane
 COLOR_PRINTER  = [0.50, 0.50, 0.50, 0.20]; // Ghosted Printer Volume
-COLOR_SPOOL    = [0.90, 0.20, 0.20, 0.70]; // Red Filament Spool / BMCU
+COLOR_SPOOL    = [0.90, 0.20, 0.20, 0.75]; // Red BMCU / Spool
+
+OUTER_W = 2*CORNER_SIZE + 3*FRAME_EDGE_LEN; // ~627 mm
+OUTER_D = 2*CORNER_SIZE + 3*FRAME_EDGE_LEN; // ~627 mm
+OUTER_H = 2*CORNER_SIZE + 4*FRAME_EDGE_LEN; // ~812 mm
 
 module full_enclosure_assembly() {
     
     // ----------------------------------------------------
-    // 1. Bottom Corner Junctions (4x)
+    // 1. The 8 Corner Blocks (4 Bottom, 4 Top)
     // ----------------------------------------------------
     color(COLOR_CORNERS) {
-        // Front-Left
-        translate([0, 0, 0])
-        bottom_corner(is_front = true, is_left = true);
+        // Bottom-Front-Left
+        translate([0, 0, 0]) corner_part();
+        // Bottom-Front-Right
+        translate([OUTER_W, 0, 0]) mirror([1, 0, 0]) corner_part();
+        // Bottom-Rear-Left
+        translate([0, OUTER_D, 0]) mirror([0, 1, 0]) corner_part();
+        // Bottom-Rear-Right
+        translate([OUTER_W, OUTER_D, 0]) mirror([1, 1, 0]) corner_part();
         
-        // Front-Right
-        translate([OUTER_WIDTH, 0, 0])
-        mirror([1, 0, 0])
-        bottom_corner(is_front = true, is_left = false);
-        
-        // Rear-Left
-        translate([0, OUTER_DEPTH, 0])
-        mirror([0, 1, 0])
-        bottom_corner(is_front = false, is_left = true);
-        
-        // Rear-Right
-        translate([OUTER_WIDTH, OUTER_DEPTH, 0])
-        mirror([1, 1, 0])
-        bottom_corner(is_front = false, is_left = false);
+        // Top-Front-Left
+        translate([0, 0, OUTER_H]) mirror([0, 0, 1]) corner_part();
+        // Top-Front-Right
+        translate([OUTER_W, 0, OUTER_H]) mirror([1, 0, 1]) corner_part();
+        // Top-Rear-Left
+        translate([0, OUTER_D, OUTER_H]) mirror([0, 1, 1]) corner_part();
+        // Top-Rear-Right
+        translate([OUTER_W, OUTER_D, OUTER_H]) mirror([1, 1, 1]) corner_part();
     }
     
     // ----------------------------------------------------
-    // 2. Top Corner Junctions (4x)
-    // ----------------------------------------------------
-    color(COLOR_CORNERS) {
-        // Front-Left
-        translate([0, 0, OUTER_HEIGHT - CORNER_BLOCK_SIZE])
-        top_corner(is_front = true, is_left = true);
-        
-        // Front-Right
-        translate([OUTER_WIDTH, 0, OUTER_HEIGHT - CORNER_BLOCK_SIZE])
-        mirror([1, 0, 0])
-        top_corner(is_front = true, is_left = false);
-        
-        // Rear-Left
-        translate([0, OUTER_DEPTH, OUTER_HEIGHT - CORNER_BLOCK_SIZE])
-        mirror([0, 1, 0])
-        top_corner(is_front = false, is_left = true);
-        
-        // Rear-Right
-        translate([OUTER_WIDTH, OUTER_DEPTH, OUTER_HEIGHT - CORNER_BLOCK_SIZE])
-        mirror([1, 1, 0])
-        top_corner(is_front = false, is_left = false);
-    }
-    
-    // ----------------------------------------------------
-    // 3. Horizontal Bottom & Top Beams
+    // 2. Standardized Horizontal & Vertical Frame Edges
     // ----------------------------------------------------
     color(COLOR_FRAME) {
-        // Front Bottom Beam (Door sill)
-        translate([OUTER_WIDTH/2, BEAM_WIDTH/2, BEAM_HEIGHT/2])
-        cube([SPAN_X, BEAM_WIDTH, BEAM_HEIGHT], center = true);
-        
-        // Rear Bottom Beam
-        translate([OUTER_WIDTH/2, OUTER_DEPTH - BEAM_WIDTH/2, BEAM_HEIGHT/2])
-        cube([SPAN_X, BEAM_WIDTH, BEAM_HEIGHT], center = true);
-        
-        // Front Top Beam
-        translate([OUTER_WIDTH/2, BEAM_WIDTH/2, OUTER_HEIGHT - BEAM_HEIGHT/2])
-        cube([SPAN_X, BEAM_WIDTH, BEAM_HEIGHT], center = true);
-        
-        // Rear Top Beam
-        translate([OUTER_WIDTH/2, OUTER_DEPTH - BEAM_WIDTH/2, OUTER_HEIGHT - BEAM_HEIGHT/2])
-        cube([SPAN_X, BEAM_WIDTH, BEAM_HEIGHT], center = true);
-        
-        // Left Top Beam
-        translate([BEAM_WIDTH/2, OUTER_DEPTH/2, OUTER_HEIGHT - BEAM_HEIGHT/2])
-        cube([BEAM_WIDTH, SPAN_Y, BEAM_HEIGHT], center = true);
-        
-        // Right Top Beam
-        translate([OUTER_WIDTH - BEAM_WIDTH/2, OUTER_DEPTH/2, OUTER_HEIGHT - BEAM_HEIGHT/2])
-        cube([BEAM_WIDTH, SPAN_Y, BEAM_HEIGHT], center = true);
-        
-        // Right Bottom Beam
-        translate([OUTER_WIDTH - BEAM_WIDTH/2, OUTER_DEPTH/2, BEAM_HEIGHT/2])
-        cube([BEAM_WIDTH, SPAN_Y, BEAM_HEIGHT], center = true);
-    }
-    
-    // ----------------------------------------------------
-    // 4. Dedicated 4-Tube PTFE Bottom Side Entry Port (Left lower beam)
-    // ----------------------------------------------------
-    color(COLOR_CORNERS) {
-        translate([BEAM_WIDTH/2, OUTER_DEPTH/2, BEAM_HEIGHT/2])
-        ptfe_entry_beam(length = SPAN_Y);
-    }
-    
-    // ----------------------------------------------------
-    // 5. Vertical Corner Pillars (4x)
-    // ----------------------------------------------------
-    color(COLOR_FRAME) {
-        // Front-Left
-        translate([BEAM_WIDTH/2, BEAM_WIDTH/2, OUTER_HEIGHT/2])
-        cube([BEAM_WIDTH, BEAM_WIDTH, SPAN_Z], center = true);
-        
-        // Front-Right
-        translate([OUTER_WIDTH - BEAM_WIDTH/2, BEAM_WIDTH/2, OUTER_HEIGHT/2])
-        cube([BEAM_WIDTH, BEAM_WIDTH, SPAN_Z], center = true);
-        
-        // Rear-Left
-        translate([BEAM_WIDTH/2, OUTER_DEPTH - BEAM_WIDTH/2, OUTER_HEIGHT/2])
-        cube([BEAM_WIDTH, BEAM_WIDTH, SPAN_Z], center = true);
-        
-        // Rear-Right
-        translate([OUTER_WIDTH - BEAM_WIDTH/2, OUTER_DEPTH - BEAM_WIDTH/2, OUTER_HEIGHT/2])
-        cube([BEAM_WIDTH, BEAM_WIDTH, SPAN_Z], center = true);
-    }
-    
-    // ----------------------------------------------------
-    // 6. Dual French Front Doors (Left & Right)
-    // ----------------------------------------------------
-    color(COLOR_DOORS) {
-        // Left Door Leaf (Shown slightly ajar at 15 deg)
-        translate([BEAM_WIDTH, BEAM_WIDTH/2, OUTER_HEIGHT/2])
-        rotate([0, 0, -15])
-        translate([DOOR_WIDTH/2, 0, 0])
-        difference() {
-            cube([DOOR_WIDTH, 12, DOOR_HEIGHT], center = true);
-            cube([DOOR_WIDTH - 36, 16, DOOR_HEIGHT - 36], center = true);
+        // Bottom Front Beam (3 segments)
+        for (i = [0 : 2]) {
+            translate([CORNER_SIZE + i*FRAME_EDGE_LEN + FRAME_EDGE_LEN/2, BEAM_WIDTH/2, BEAM_HEIGHT/2])
+            rotate([0, 0, -90])
+            edge_standard(has_spline = false);
         }
         
-        // Right Door Leaf (Shown closed)
-        translate([OUTER_WIDTH - BEAM_WIDTH, BEAM_WIDTH/2, OUTER_HEIGHT/2])
-        translate([-DOOR_WIDTH/2, 0, 0])
-        difference() {
-            cube([DOOR_WIDTH, 12, DOOR_HEIGHT], center = true);
-            cube([DOOR_WIDTH - 36, 16, DOOR_HEIGHT - 36], center = true);
+        // Bottom Rear Beam (3 segments)
+        for (i = [0 : 2]) {
+            translate([CORNER_SIZE + i*FRAME_EDGE_LEN + FRAME_EDGE_LEN/2, OUTER_D - BEAM_WIDTH/2, BEAM_HEIGHT/2])
+            rotate([0, 0, 90])
+            edge_standard(has_spline = true);
         }
-    }
-    
-    // ----------------------------------------------------
-    // 7. Dual Top Roof Doors + Heat Dissipation Prop Legs
-    // ----------------------------------------------------
-    color(COLOR_DOORS) {
-        // Left Roof Door (Propped open at 35 deg for ventilation)
-        translate([BEAM_WIDTH, OUTER_DEPTH/2, OUTER_HEIGHT - BEAM_HEIGHT/2])
-        rotate([0, -35, 0])
-        translate([ROOF_DOOR_WIDTH/2, 0, 0]) {
-            difference() {
-                cube([ROOF_DOOR_WIDTH, ROOF_DOOR_DEPTH, 12], center = true);
-                cube([ROOF_DOOR_WIDTH - 32, ROOF_DOOR_DEPTH - 32, 16], center = true);
-            }
+        
+        // Bottom Right Beam (3 segments)
+        for (i = [0 : 2]) {
+            translate([OUTER_W - BEAM_WIDTH/2, CORNER_SIZE + i*FRAME_EDGE_LEN + FRAME_EDGE_LEN/2, BEAM_HEIGHT/2])
+            edge_standard(has_spline = true);
+        }
+        
+        // Top Beams (Front, Rear, Left, Right - 3 segments each)
+        for (i = [0 : 2]) {
+            // Top Front
+            translate([CORNER_SIZE + i*FRAME_EDGE_LEN + FRAME_EDGE_LEN/2, BEAM_WIDTH/2, OUTER_H - BEAM_HEIGHT/2])
+            rotate([0, 0, -90])
+            edge_standard(has_spline = false);
             
-            // Integrated Prop Leg holding it up
-            translate([ROOF_DOOR_WIDTH/2 - 10, 0, -6])
-            rotate([0, 75, 0])
-            roof_prop_leg(length = 120);
+            // Top Rear
+            translate([CORNER_SIZE + i*FRAME_EDGE_LEN + FRAME_EDGE_LEN/2, OUTER_D - BEAM_WIDTH/2, OUTER_H - BEAM_HEIGHT/2])
+            rotate([0, 0, 90])
+            edge_standard(has_spline = true);
+            
+            // Top Left
+            translate([BEAM_WIDTH/2, CORNER_SIZE + i*FRAME_EDGE_LEN + FRAME_EDGE_LEN/2, OUTER_H - BEAM_HEIGHT/2])
+            edge_standard(has_spline = true);
+            
+            // Top Right
+            translate([OUTER_W - BEAM_WIDTH/2, CORNER_SIZE + i*FRAME_EDGE_LEN + FRAME_EDGE_LEN/2, OUTER_H - BEAM_HEIGHT/2])
+            edge_standard(has_spline = true);
         }
         
-        // Right Roof Door (Closed position)
-        translate([OUTER_WIDTH - BEAM_WIDTH, OUTER_DEPTH/2, OUTER_HEIGHT - BEAM_HEIGHT/2])
-        translate([-ROOF_DOOR_WIDTH/2, 0, 0])
-        difference() {
-            cube([ROOF_DOOR_WIDTH, ROOF_DOOR_DEPTH, 12], center = true);
-            cube([ROOF_DOOR_WIDTH - 32, ROOF_DOOR_DEPTH - 32, 16], center = true);
+        // Rear Vertical Pillars (2 corners x 4 segments each)
+        for (i = [0 : 3]) {
+            translate([BEAM_WIDTH/2, OUTER_D - BEAM_WIDTH/2, CORNER_SIZE + i*FRAME_EDGE_LEN + FRAME_EDGE_LEN/2])
+            rotate([90, 0, 0])
+            edge_standard(has_spline = true);
+            
+            translate([OUTER_W - BEAM_WIDTH/2, OUTER_D - BEAM_WIDTH/2, CORNER_SIZE + i*FRAME_EDGE_LEN + FRAME_EDGE_LEN/2])
+            rotate([90, 0, 0])
+            edge_standard(has_spline = true);
         }
     }
     
     // ----------------------------------------------------
-    // 8. Cellophane Packaging Film Sheets (Translucent preview)
+    // 3. Bottom Side Beam with 4-Tube PTFE Route
+    // ----------------------------------------------------
+    color(COLOR_FRAME) {
+        translate([BEAM_WIDTH/2, CORNER_SIZE + 0*FRAME_EDGE_LEN + FRAME_EDGE_LEN/2, BEAM_HEIGHT/2])
+        edge_standard(has_spline = true);
+        
+        translate([BEAM_WIDTH/2, CORNER_SIZE + 2*FRAME_EDGE_LEN + FRAME_EDGE_LEN/2, BEAM_HEIGHT/2])
+        edge_standard(has_spline = true);
+    }
+    color(COLOR_PTFE) {
+        // Middle segment on lower left beam is the PTFE port!
+        translate([BEAM_WIDTH/2, CORNER_SIZE + 1*FRAME_EDGE_LEN + FRAME_EDGE_LEN/2, BEAM_HEIGHT/2])
+        edge_ptfe();
+    }
+    
+    // ----------------------------------------------------
+    // 4. Front Vertical Corner Pillars with Integrated Hinges
+    // ----------------------------------------------------
+    color(COLOR_FRAME) {
+        // Left Front Pillar (Segments 0, 1, 2 have hinges; segment 3 standard)
+        for (i = [0 : 2]) {
+            translate([BEAM_WIDTH/2, BEAM_WIDTH/2, CORNER_SIZE + i*FRAME_EDGE_LEN + FRAME_EDGE_LEN/2])
+            rotate([90, 0, 0])
+            edge_hinge(is_left_pillar = true);
+        }
+        translate([BEAM_WIDTH/2, BEAM_WIDTH/2, CORNER_SIZE + 3*FRAME_EDGE_LEN + FRAME_EDGE_LEN/2])
+        rotate([90, 0, 0])
+        edge_standard(has_spline = false);
+        
+        // Right Front Pillar
+        for (i = [0 : 2]) {
+            translate([OUTER_W - BEAM_WIDTH/2, BEAM_WIDTH/2, CORNER_SIZE + i*FRAME_EDGE_LEN + FRAME_EDGE_LEN/2])
+            rotate([90, 0, 0])
+            edge_hinge(is_left_pillar = false);
+        }
+        translate([OUTER_W - BEAM_WIDTH/2, BEAM_WIDTH/2, CORNER_SIZE + 3*FRAME_EDGE_LEN + FRAME_EDGE_LEN/2])
+        rotate([90, 0, 0])
+        edge_standard(has_spline = false);
+    }
+    
+    // ----------------------------------------------------
+    // 5. Dual Face-Overlay French Doors (Left & Right)
+    // Resting directly against the front face of the 24mm frame beams
+    // ----------------------------------------------------
+    color(COLOR_DOORS) {
+        door_w = OUTER_W / 2;
+        door_h = OUTER_H;
+        
+        // Left Door Leaf (Shown slightly open at 18 deg)
+        translate([BEAM_WIDTH/2 - 2, 0, 0])
+        rotate([0, 0, -18])
+        translate([door_w/2, -DOOR_PROFILE_T/2, door_h/2])
+        difference() {
+            cube([door_w, DOOR_PROFILE_T, door_h - 12], center = true);
+            cube([door_w - 2*DOOR_PROFILE_W, DOOR_PROFILE_T + 4, door_h - 12 - 2*DOOR_PROFILE_W], center = true);
+        }
+        
+        // Right Door Leaf (Closed position, resting flush against frame face)
+        translate([OUTER_W - BEAM_WIDTH/2 + 2, 0, 0])
+        translate([-door_w/2, -DOOR_PROFILE_T/2, door_h/2])
+        difference() {
+            cube([door_w, DOOR_PROFILE_T, door_h - 12], center = true);
+            cube([door_w - 2*DOOR_PROFILE_W, DOOR_PROFILE_T + 4, door_h - 12 - 2*DOOR_PROFILE_W], center = true);
+        }
+    }
+    
+    // ----------------------------------------------------
+    // 6. Cellophane Panels (Mounted on doors and static walls)
     // ----------------------------------------------------
     color(COLOR_PLASTIC) {
-        // Left Wall Cellophane Sheet
-        translate([BEAM_WIDTH/2, OUTER_DEPTH/2, OUTER_HEIGHT/2])
-        cube([0.5, INTERNAL_DEPTH, INTERNAL_HEIGHT], center = true);
+        // Left Static Wall
+        translate([BEAM_WIDTH/2, OUTER_D/2, OUTER_H/2])
+        cube([0.5, OUTER_D - 2*CORNER_SIZE, OUTER_H - 2*CORNER_SIZE], center = true);
+        // Right Static Wall
+        translate([OUTER_W - BEAM_WIDTH/2, OUTER_D/2, OUTER_H/2])
+        cube([0.5, OUTER_D - 2*CORNER_SIZE, OUTER_H - 2*CORNER_SIZE], center = true);
+        // Rear Static Wall
+        translate([OUTER_W/2, OUTER_D - BEAM_WIDTH/2, OUTER_H/2])
+        cube([OUTER_W - 2*CORNER_SIZE, 0.5, OUTER_H - 2*CORNER_SIZE], center = true);
         
-        // Right Wall Cellophane Sheet
-        translate([OUTER_WIDTH - BEAM_WIDTH/2, OUTER_DEPTH/2, OUTER_HEIGHT/2])
-        cube([0.5, INTERNAL_DEPTH, INTERNAL_HEIGHT], center = true);
-        
-        // Rear Wall Cellophane Sheet
-        translate([OUTER_WIDTH/2, OUTER_DEPTH - BEAM_WIDTH/2, OUTER_HEIGHT/2])
-        cube([INTERNAL_WIDTH, 0.5, INTERNAL_HEIGHT], center = true);
-        
-        // Right Door Pane
-        translate([OUTER_WIDTH - BEAM_WIDTH - DOOR_WIDTH/2, BEAM_WIDTH/2, OUTER_HEIGHT/2])
-        cube([DOOR_WIDTH - 30, 0.5, DOOR_HEIGHT - 30], center = true);
-        
-        // Right Roof Door Pane
-        translate([OUTER_WIDTH - BEAM_WIDTH - ROOF_DOOR_WIDTH/2, OUTER_DEPTH/2, OUTER_HEIGHT - BEAM_HEIGHT/2])
-        cube([ROOF_DOOR_WIDTH - 30, ROOF_DOOR_DEPTH - 30, 0.5], center = true);
+        // Right Door Cellophane Pane (moves with door)
+        translate([OUTER_W/4 * 3, -DOOR_PROFILE_T/2, OUTER_H/2])
+        cube([OUTER_W/2 - 2*DOOR_PROFILE_W, 0.5, OUTER_H - 12 - 2*DOOR_PROFILE_W], center = true);
     }
     
     // ----------------------------------------------------
-    // 9. Bambu Lab A1 Ghost Envelope & Spool / BMCU Clearances
+    // 7. Bambu Lab A1 Printer Envelope & Poop Bucket
     // ----------------------------------------------------
     color(COLOR_PRINTER) {
-        // A1 Base & Gantry
-        translate([OUTER_WIDTH/2 - 20, OUTER_DEPTH/2, 230])
-        cube([385, 410, 465], center = true);
-        
-        // Y Bed Travel Envelope (Full forward & backward bed movement)
-        translate([OUTER_WIDTH/2 - 20, OUTER_DEPTH/2, 70])
-        cube([270, 540, 20], center = true);
-        
-        // Right Poop Bucket Area
-        translate([OUTER_WIDTH - BEAM_WIDTH - 60, OUTER_DEPTH/2 - 40, 60])
+        // Base
+        translate([OUTER_W/2 - 20, OUTER_D/2, 35])
+        cube([385, 340, 50], center = true);
+        // Gantry
+        translate([OUTER_W/2 - 20, OUTER_D/2, 260])
+        cube([410, 50, 465], center = true);
+        // Moving Bed
+        translate([OUTER_W/2 - 20, OUTER_D/2, 70])
+        cube([256, 256, 14], center = true);
+        // Right Poop Bucket
+        translate([OUTER_W - BEAM_WIDTH - 60, OUTER_D/2 - 40, 60])
         cube([80, 140, 100], center = true);
     }
     
-    // Top BMCU 370c + Spool Envelope
+    // Top BMCU & Spool
     color(COLOR_SPOOL) {
-        translate([OUTER_WIDTH/2 - 20, OUTER_DEPTH/2, 590])
+        translate([OUTER_W/2 - 20, OUTER_D/2, 590])
         rotate([0, 90, 0])
         cylinder(d = 200, h = 65, center = true);
     }
 }
 
-// Render the complete digital twin assembly
+// Standalone render
 full_enclosure_assembly();

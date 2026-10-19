@@ -1,61 +1,56 @@
 # Bill of Materials (BOM) & Print Matrix
-## 100% 3D Printable Bambu Lab A1 Enclosure
+## Ultra-Minimal 8-Part Modular Kit for Bambu Lab A1 Enclosure
 
-All components are designed to print without supports on a standard **Bambu Lab A1 (256 × 256 mm)** build plate. Zero metal hardware, screws, or nuts required.
+The entire enclosure is built using only **8 unique 3D printable parts** (+ 1 spring spline clip).
+Every piece is $\le 185\text{ mm}$ and prints without supports on the **Bambu Lab A1 (256 × 256 mm)**. Zero metal screws, zero separate pegs/pins, and zero complex sub-assemblies.
 
 ---
 
-## 1. 3D Print Manifest
+## 1. 3D Print Manifest (The 8 Parts)
 
 ### Recommended Slicer Settings (Bambu Studio / OrcaSlicer)
-- **Filament**: PETG (Recommended for thermal resistance & clip flexibility) or PLA+ / Tough PLA
+- **Filament**: PETG (Recommended for thermal resistance & spring compliance) or PLA+
 - **Nozzle**: 0.4 mm
 - **Layer Height**: 0.20 mm Standard
-- **Wall Loops / Perimeters**: 3 to 4 (Provides rigid structural strength for frame beams)
-- **Top / Bottom Shells**: 4 layers
-- **Infill**: 15% to 20% (Gyroid or Grid)
-- **Brim**: Recommended 5 mm inner/outer brim on tall vertical pillar segments if bed adhesion needs support.
+- **Wall Loops**: 3 to 4 (Provides high stiffness for frame and door struts)
+- **Infill**: 15% to 20% (Gyroid)
+- **Support**: None required (All overhangs and pockets designed within 45° FDM rules)
 
-### Print Matrix & Plate Allocation
+### Complete Parts Table
 
-| Part Name | Source File | Qty | Est. Print Time (A1 Standard) | Notes |
-| :--- | :--- | :---: | :---: | :--- |
-| **Dovetail Test Coupon** | `cad/tests/dovetail_test_coupon.scad` | 1 | 25 min | **Print 1st**: Verifies dovetail slide & pin tightness |
-| **Spline Test Coupon** | `cad/tests/spline_test_coupon.scad` | 1 | 15 min | **Print 2nd**: Tests cellophane clamping with shipping bag |
-| **Bottom Corner Blocks** | `cad/parts/corner_bottom.scad` | 4 | ~1 hr 40 min | 4 corner nodes with wedge sockets (1 plate) |
-| **Top Corner Blocks** | `cad/parts/corner_top.scad` | 4 | ~1 hr 50 min | With door and roof hinge knuckles |
-| **X-Span Beams (Front/Back)** | `cad/parts/beam_strut.scad` | 8 | ~3 hr 30 min | 4x `beam_x_mid`, 4x `beam_x_end` (width span) |
-| **Y-Span Beams (Sides)** | `cad/parts/beam_strut.scad` | 7 | ~3 hr 15 min | 3x `beam_y_mid`, 4x `beam_y_end` (depth span) |
-| **4-Tube PTFE Bottom Beam** | `cad/modules/ptfe_mount.scad` | 1 | ~50 min | Replaces 1 bottom side Y-beam segment |
-| **Z-Span Vertical Pillars** | `cad/parts/beam_strut.scad` | 12 | ~5 hr 20 min | 4 corners × 3 vertical segments (height span) |
-| **Front Door Frames** | `cad/parts/front_door.scad` | 2 sets | ~3 hr 45 min | 6 vertical stiles, 4 horizontal rail halves |
-| **Door Handle & Latches** | `cad/parts/front_door.scad` | 2 | ~35 min | Dual snap-latches and pull handles |
-| **Top Roof Doors** | `cad/parts/top_roof_door.scad` | 2 sets | ~3 hr 20 min | 6 depth stiles, 4 cross rails |
-| **Roof Prop Legs (Kickstands)**| `cad/parts/top_roof_door.scad` | 2 | ~40 min | Multi-angle heat dissipation prop legs |
-| **Snap-in Spline Clips** | `cad/parts/spline_clip.scad` | ~30 | ~2 hr 30 min | Tension clips for cellophane sheets |
-| **Joint Hardware / Pegs** | *N/A (Peg-Free)* | **0** | **0 min** | **Self-locking dual-taper angled flaps!** |
+| # | Part Name | STL File | Source File | Qty | Purpose & Notes |
+| :-: | :--- | :--- | :--- | :---: | :--- |
+| **1** | **Corner Part** | `1_corner_part.stl` | `cad/parts/corner_part.scad` | **8** | Universal directional 3-way corner (4 bottom, 4 top) |
+| **2** | **Edge Standard** | `2_edge_standard.stl` | `cad/parts/edge_standard.scad` | **25** | Standard 185 mm structural beam (X, Y, Z spans) |
+| **3** | **Edge with Hinge** | `3_edge_hinge.stl` | `cad/parts/edge_hinge.scad` | **6** | Front pillar uprights with offset female door hinges |
+| **4** | **Edge with PTFE** | `4_edge_ptfe.stl` | `cad/parts/edge_ptfe.scad` | **1** | Lower side beam with 4 angled Bowden guide channels |
+| **5** | **Door Corner** | `5_door_corner.stl` | `cad/parts/door_corner.scad` | **8** | 90° L-corners for the two French door leaves |
+| **6** | **Door Edge** | `6_door_edge.stl` | `cad/parts/door_edge.scad` | **10** | Standard 138 mm slim door strut (top/bottom rails & stiles)|
+| **7** | **Door Edge Handle**| `7_door_edge_handle.stl`| `cad/parts/door_edge_handle.scad`| **2** | Meeting stiles with pull handle & draft-stop overlap lip |
+| **8** | **Door Edge Hinge** | `8_door_edge_hinge.stl` | `cad/parts/door_edge_hinge.scad` | **6** | Outer door stiles with male hinge knuckles |
+| **9** | **Spline Clip Batch**| `9_spline_clip_batch.stl`| `cad/parts/spline_clip.scad` | **~25** | Compliant split-core spring clamps for cellophane |
+
+*Note: For proppable top roof doors, simply print an additional set of door parts (#5, #6, #8).*
 
 ---
 
-## 2. Cellophane / Packaging Plastic Cutting Matrix
+## 2. Cellophane Packaging Plastic Cutting Matrix
 
-Cut the original clear plastic packaging bag that came wrapped around your Bambu Lab A1 using standard scissors or a craft knife. Add **15–20 mm extra margin on each side** so the film seats fully down into the U-grooves when the spline clip is snapped into place.
+Cut the original clear plastic packaging bag that came wrapped around your Bambu Lab A1 using standard scissors or a craft knife. Add **15–20 mm extra margin on each side** so the film seats fully down into the U-grooves when the spring clip is pressed into place.
 
 | Panel Position | Width (mm) | Height / Depth (mm) | Finished Panel Cut Size (with margins) |
 | :--- | :---: | :---: | :--- |
-| **Left Wall** | 580 mm | 710 mm | Cut sheet: **620 × 750 mm** |
-| **Right Wall** | 580 mm | 710 mm | Cut sheet: **620 × 750 mm** |
-| **Rear Wall** | 560 mm | 710 mm | Cut sheet: **600 × 750 mm** |
-| **Left Front Door** | 275 mm | 704 mm | Cut sheet: **310 × 740 mm** |
-| **Right Front Door** | 275 mm | 704 mm | Cut sheet: **310 × 740 mm** |
-| **Left Top Roof Door** | 276 mm | 574 mm | Cut sheet: **310 × 610 mm** |
-| **Right Top Roof Door**| 276 mm | 574 mm | Cut sheet: **310 × 610 mm** |
+| **Left Static Wall** | 580 mm | 760 mm | Cut sheet: **620 × 800 mm** |
+| **Right Static Wall**| 580 mm | 760 mm | Cut sheet: **620 × 800 mm** |
+| **Rear Static Wall** | 580 mm | 760 mm | Cut sheet: **620 × 800 mm** |
+| **Left French Door** | 280 mm | 750 mm | Cut sheet: **320 × 790 mm** (Mounts directly on door frame) |
+| **Right French Door**| 280 mm | 750 mm | Cut sheet: **320 × 790 mm** (Mounts directly on door frame) |
 
 ---
 
-## 3. Hardware Requirements
+## 3. Fasteners & Hardware
 
 - **Screws**: 0 (Zero)
 - **Nuts**: 0 (Zero)
-- **Glue**: 0 (Zero required; joints are tension-locked via wedge pins)
-- **PTFE Tube**: Standard 4 mm OD Bowden tube (from AMS Lite, drybox, or external spool holder)
+- **Glue**: 0 (Zero)
+- **Pins / Pegs**: 0 (Zero! 100% self-wedging dual-taper joints)
