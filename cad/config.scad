@@ -36,24 +36,28 @@ TOL_HINGE    = 0.30; // Free rotating hinge pins
 TOL_LOOSE    = 0.40; // Clearance gaps
 
 // --- Cellophane Spline Groove Specifications ---
-GROOVE_WIDTH  = 4.5; // Width of U-channel
-GROOVE_DEPTH  = 5.0; // Depth of U-channel
+GROOVE_WIDTH      = 4.5;  // Width of U-channel
+GROOVE_DEPTH      = 4.5;  // Depth of U-channel
+SPLINE_END_MARGIN = 13.0; // Margin from beam ends so dovetails (10mm) never reach spline slots
+FRAME_SPLINE_LEN  = FRAME_EDGE_LEN - 2 * SPLINE_END_MARGIN; // 159 mm central slot
+DOOR_SPLINE_LEN   = DOOR_EDGE_LEN - 2 * 10.0; // 118 mm central slot
 
 // --- Peg-Free Dual-Taper Wedge Dovetail Dimensions ---
-DOVETAIL_DEPTH = 15.0; // Length of wedge insert (mm)
+// Sized so dovetails do not reach or intersect the spline slots
+DOVETAIL_DEPTH = 10.0; // Length of wedge insert (mm) - stays clear of spline slots
 
 // Main Frame Wedge Dovetail
-FRAME_BOT_ROOT = 7.5;  // Bottom root width (narrow entry)
-FRAME_BOT_TIP  = 13.5; // Bottom tip width
-FRAME_TOP_ROOT = 9.5;  // Top root width (wide wedge lock)
-FRAME_TOP_TIP  = 16.5; // Top tip width
+FRAME_BOT_ROOT = 6.5;  // Bottom root width (narrow entry)
+FRAME_BOT_TIP  = 10.5; // Bottom tip width
+FRAME_TOP_ROOT = 8.0;  // Top root width (wide wedge lock)
+FRAME_TOP_TIP  = 12.5; // Top tip width (half-width 6.25mm < 7.5mm spline boundary)
 
 // Mini Door Wedge Dovetail (scaled for 18x16 mm door profile)
-DOOR_BOT_ROOT  = 5.5;
-DOOR_BOT_TIP   = 9.5;
-DOOR_TOP_ROOT  = 7.0;
-DOOR_TOP_TIP   = 12.0;
-DOOR_DEPTH     = 10.0;
+DOOR_BOT_ROOT  = 5.0;
+DOOR_BOT_TIP   = 8.5;
+DOOR_TOP_ROOT  = 6.5;
+DOOR_TOP_TIP   = 10.5;
+DOOR_DEPTH     = 8.0;
 
 // --- Filament PTFE Tube Routing (Bottom Side Beam) ---
 PTFE_TUBE_OD  = 4.0; // Standard PTFE bowden tube outer diameter (mm)

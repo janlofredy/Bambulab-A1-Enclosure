@@ -24,16 +24,17 @@ module edge_standard(
         cube([width, length, height], center = true);
         
         // Spline slot 1 on outside edge (+X face)
+        // Uses FRAME_SPLINE_LEN so dovetails (10mm) do not reach the spline slots
         if (spline_x) {
             translate([width/2, 0, 0])
             rotate([0, 90, 0])
-            spline_groove_negative(length = length + 2, axis = "Y");
+            spline_groove_negative(length = FRAME_SPLINE_LEN, axis = "Y");
         }
         
         // Spline slot 2 on outside edge (+Z face)
         if (spline_z) {
             translate([0, 0, height/2])
-            spline_groove_negative(length = length + 2, axis = "Y");
+            spline_groove_negative(length = FRAME_SPLINE_LEN, axis = "Y");
         }
         
         // Female open-top wedge pocket at -Y end
