@@ -28,12 +28,12 @@ module male_dovetail(
     depth = DOVETAIL_DEPTH,
     tol = 0
 ) {
-    // Starts at flat side (-h/2) and goes 60% through
+    // Starts at flat inside face (-h/2) and goes 60% through
     z_start = -h/2 + tol;
     z_end   = -h/2 + 0.60 * h - tol;
     
-    // Shift slightly toward flat side in X (-w/2) so it stays clear of +X spline as well
-    x_off = -2.5;
+    // Shift toward inside face in X (-w/2) away from +X spline slot
+    x_off = -3.5;
     
     b_root = 6.0 - 2*tol;
     b_tip  = 9.5 - 2*tol;
@@ -65,11 +65,12 @@ module female_dovetail_pocket(
     depth = DOVETAIL_DEPTH,
     tol = TOL_DOVETAIL
 ) {
-    // Starts at flat side (-h/2, open) and goes 60% through
+    // Starts at flat inside face (-h/2, open) and goes 60% through
     z_start = -h/2 - 1.0;
     z_end   = -h/2 + 0.60 * h + tol;
     
-    x_off = -2.5;
+    // Shift toward inside face in X (-w/2) away from +X spline slot, matching male_dovetail
+    x_off = -3.5;
     
     b_root = 6.0 + 2*tol;
     b_tip  = 9.5 + 2*tol;
@@ -78,7 +79,6 @@ module female_dovetail_pocket(
     
     translate([x_off, 0, 0])
     union() {
-        mirror([0, 1, 0])
         hull() {
             translate([0, 0, z_start])
             linear_extrude(height = 0.5)
@@ -90,7 +90,7 @@ module female_dovetail_pocket(
         }
         
         // Matching snap detent groove in pocket floor near 60% ceiling
-        translate([0, -depth, z_end - 2.5])
+        translate([0, depth, z_end - 2.5])
         rotate([0, 90, 0])
         cylinder(r = 0.8, h = t_tip + 2, center = true, $fn=16);
     }

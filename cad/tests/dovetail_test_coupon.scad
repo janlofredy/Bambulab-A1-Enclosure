@@ -20,9 +20,8 @@ translate([-BEAM_WIDTH/2 - 6, 0, BEAM_HEIGHT/2])
 difference() {
     cube([BEAM_WIDTH, test_len, BEAM_HEIGHT], center = true);
     
-    // Female pocket opens on -Y face and top (+Z)
+    // Female pocket opens on -Y face and bottom (-Z)
     translate([0, -test_len/2, 0])
-    rotate([0, 0, 180])
     female_dovetail_pocket(w = BEAM_WIDTH, h = BEAM_HEIGHT);
     
     // Label embossed on top
@@ -32,15 +31,14 @@ difference() {
 }
 
 // ----------------------------------------------------
-// 2. Male Test Block (Right side, tenon projects forward -Y)
+// 2. Male Test Block (Right side, tenon projects in +Y)
 // ----------------------------------------------------
 translate([BEAM_WIDTH/2 + 6, 0, BEAM_HEIGHT/2])
 union() {
     cube([BEAM_WIDTH, test_len, BEAM_HEIGHT], center = true);
     
-    // Male dovetail tenon starts at -Y face and projects forward in -Y
-    translate([0, -test_len/2, 0])
-    rotate([0, 0, 180])
+    // Male dovetail tenon starts at +Y face and projects forward in +Y
+    translate([0, test_len/2, 0])
     male_dovetail(w = BEAM_WIDTH, h = BEAM_HEIGHT);
     
     // Label embossed on top

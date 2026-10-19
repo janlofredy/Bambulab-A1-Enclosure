@@ -32,13 +32,14 @@ module corner_part() {
             male_dovetail(w = bw, h = bh);
         }
         
-        // Female open-top wedge pocket on +X arm (recesses into -X, open at +Z)
+        // Female open-top wedge pocket on +X arm (recesses into -X, open at bottom -Z)
         translate([cs, bw/2, bh/2])
-        rotate([0, 0, -90])
+        rotate([0, 0, 90])
         female_dovetail_pocket(w = bw, h = bh);
         
-        // Female open-top wedge pocket on +Y arm (recesses into -Y, open at +Z)
+        // Female open-top wedge pocket on +Y arm (recesses into -Y, open at bottom -Z)
         translate([bw/2, cs, bh/2])
+        mirror([0, 1, 0])
         female_dovetail_pocket(w = bw, h = bh);
         
         // Rubber bumper foot recess on bottom face (-Z)

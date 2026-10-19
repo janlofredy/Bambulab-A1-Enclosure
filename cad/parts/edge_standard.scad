@@ -37,9 +37,8 @@ module edge_standard(
             spline_groove_negative(length = length + 2, axis = "Y");
         }
         
-        // Female open-top wedge pocket at -Y end
+        // Female open-top wedge pocket at -Y end (aligned to inside face away from spline slots)
         translate([0, -length/2, 0])
-        rotate([0, 0, 180])
         female_dovetail_pocket(w = width, h = height);
         
         // Internal weight reduction channel
