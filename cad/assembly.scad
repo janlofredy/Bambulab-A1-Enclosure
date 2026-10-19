@@ -140,37 +140,38 @@ module full_enclosure_assembly(show_splines = true, show_cellophane = true, show
         // Bottom Front Beam (3 segments, clean face for door overlay)
         for (i = [0 : 2]) {
             translate([CORNER_SIZE + i*FRAME_EDGE_LEN + FRAME_EDGE_LEN/2, BEAM_WIDTH/2, BEAM_HEIGHT/2])
-            rotate([0, 0, -90])
-            edge_standard(has_spline = false);
+            rotate([0, 180, 90])
+            edge_standard(has_spline_x = false, has_spline_z = false);
         }
         
         // Bottom Rear Beam (3 segments)
         for (i = [0 : 2]) {
             translate([CORNER_SIZE + i*FRAME_EDGE_LEN + FRAME_EDGE_LEN/2, OUTER_D - BEAM_WIDTH/2, BEAM_HEIGHT/2])
-            rotate([0, 0, 90])
+            rotate([0, 90, 90])
             edge_standard(has_spline = true);
         }
         
         // Bottom Right Beam (3 segments)
         for (i = [0 : 2]) {
             translate([OUTER_W - BEAM_WIDTH/2, CORNER_SIZE + i*FRAME_EDGE_LEN + FRAME_EDGE_LEN/2, BEAM_HEIGHT/2])
+            rotate([180, 0, 0])
             edge_standard(has_spline = true);
         }
         
         // Bottom Left Beam (Segments 0 & 2 standard)
         translate([BEAM_WIDTH/2, CORNER_SIZE + 0*FRAME_EDGE_LEN + FRAME_EDGE_LEN/2, BEAM_HEIGHT/2])
-        rotate([0, 0, 180])
+        rotate([180, 90, 0])
         edge_standard(has_spline = true);
         
         translate([BEAM_WIDTH/2, CORNER_SIZE + 2*FRAME_EDGE_LEN + FRAME_EDGE_LEN/2, BEAM_HEIGHT/2])
-        rotate([0, 0, 180])
+        rotate([180, 90, 0])
         edge_standard(has_spline = true);
         
         // Top Beams
         for (i = [0 : 2]) {
-            // Top Front (Spline on top face only)
+            // Top Front (Spline on top roof face only, clean for door overlay)
             translate([CORNER_SIZE + i*FRAME_EDGE_LEN + FRAME_EDGE_LEN/2, BEAM_WIDTH/2, OUTER_H - BEAM_HEIGHT/2])
-            rotate([0, 0, -90])
+            rotate([0, 270, 90])
             edge_standard(has_spline_x = false, has_spline_z = true);
             
             // Top Rear
@@ -185,6 +186,7 @@ module full_enclosure_assembly(show_splines = true, show_cellophane = true, show
             
             // Top Right
             translate([OUTER_W - BEAM_WIDTH/2, CORNER_SIZE + i*FRAME_EDGE_LEN + FRAME_EDGE_LEN/2, OUTER_H - BEAM_HEIGHT/2])
+            rotate([0, 270, 180])
             edge_standard(has_spline = true);
         }
         
@@ -202,7 +204,7 @@ module full_enclosure_assembly(show_splines = true, show_cellophane = true, show
         // Vertical Front Pillars (Hinges on segments 0, 1, 2)
         for (i = [0 : 2]) {
             translate([BEAM_WIDTH/2, BEAM_WIDTH/2, CORNER_SIZE + i*FRAME_EDGE_LEN + FRAME_EDGE_LEN/2])
-            rotate([90, 0, 0])
+            rotate([90, 0, 270])
             edge_hinge(is_left_pillar = true);
             
             translate([OUTER_W - BEAM_WIDTH/2, BEAM_WIDTH/2, CORNER_SIZE + i*FRAME_EDGE_LEN + FRAME_EDGE_LEN/2])
@@ -210,18 +212,18 @@ module full_enclosure_assembly(show_splines = true, show_cellophane = true, show
             edge_hinge(is_left_pillar = false);
         }
         translate([BEAM_WIDTH/2, BEAM_WIDTH/2, CORNER_SIZE + 3*FRAME_EDGE_LEN + FRAME_EDGE_LEN/2])
-        rotate([90, 0, 0])
-        edge_standard(has_spline = false);
+        rotate([90, 0, 270])
+        edge_standard(has_spline_x = false, has_spline_z = true);
         
         translate([OUTER_W - BEAM_WIDTH/2, BEAM_WIDTH/2, CORNER_SIZE + 3*FRAME_EDGE_LEN + FRAME_EDGE_LEN/2])
         rotate([90, 0, 0])
-        edge_standard(has_spline = false);
+        edge_standard(has_spline_x = true, has_spline_z = false);
     }
     
     // Bottom Side Beam PTFE Entry Port (Middle segment)
     color(COLOR_PTFE) {
         translate([BEAM_WIDTH/2, CORNER_SIZE + 1*FRAME_EDGE_LEN + FRAME_EDGE_LEN/2, BEAM_HEIGHT/2])
-        rotate([0, 0, 180])
+        rotate([180, 90, 0])
         edge_ptfe();
     }
     

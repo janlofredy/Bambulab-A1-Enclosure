@@ -33,12 +33,12 @@ module male_dovetail(
     z_end   = -h/2 + 0.60 * h - tol;
     
     // Shift toward inside face in X (-w/2) away from +X spline slot
-    x_off = -3.5;
+    x_off = -4.5;
     
     b_root = 6.0 - 2*tol;
     b_tip  = 9.5 - 2*tol;
-    t_root = 8.0 - 2*tol;
-    t_tip  = 12.0 - 2*tol;
+    t_root = 7.5 - 2*tol;
+    t_tip  = 11.0 - 2*tol;
     
     translate([x_off, 0, 0])
     union() {
@@ -70,12 +70,12 @@ module female_dovetail_pocket(
     z_end   = -h/2 + 0.60 * h + tol;
     
     // Shift toward inside face in X (-w/2) away from +X spline slot, matching male_dovetail
-    x_off = -3.5;
+    x_off = -4.5;
     
     b_root = 6.0 + 2*tol;
     b_tip  = 9.5 + 2*tol;
-    t_root = 8.0 + 2*tol;
-    t_tip  = 12.0 + 2*tol;
+    t_root = 7.5 + 2*tol;
+    t_tip  = 11.0 + 2*tol;
     
     translate([x_off, 0, 0])
     union() {

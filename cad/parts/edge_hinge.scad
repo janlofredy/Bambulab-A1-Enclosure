@@ -16,25 +16,42 @@ module edge_hinge(
     height = BEAM_HEIGHT,
     is_left_pillar = true
 ) {
-    knuckle_x = is_left_pillar ? (-width/2 + 4.0) : (width/2 - 4.0);
     union() {
-        // Base edge body:
-        // has_spline_x = true (side wall cellophane)
-        // has_spline_z = false (replaced by hinge)
-        edge_standard(
-            length = length,
-            width  = width,
-            height = height,
-            has_spline_x = true,
-            has_spline_z = false
-        );
-        
-        // Female hinge knuckle on +Z face (replacing 1 spline side)
-        // Positioned toward the door side (-X on left pillar, +X on right pillar)
-        // Offset forward so the overlay door swings 180° flat against the side
-        translate([knuckle_x, 0, height/2 + 2.0])
-        rotate([90, 0, 0])
-        hinge_female_knuckle();
+        if (is_left_pillar) {
+            // Left pillar:
+            // Side wall spline is on +Z face (maps to global -X)
+            // Front door face is on +X face (maps to global -Y)
+            edge_standard(
+                length = length,
+                width  = width,
+                height = height,
+                has_spline_x = false,
+                has_spline_z = true
+            );
+            
+            // Female hinge knuckle on +X face (facing front -Y)
+            // Offset towards the inside door side (-Z face in local, +X in global)
+            translate([width/2 + 2.0, 0, -height/2 + 4.0])
+            rotate([90, 0, 0])
+            hinge_female_knuckle();
+        } else {
+            // Right pillar:
+            // Side wall spline is on +X face (maps to global +X)
+            // Front door face is on +Z face (maps to global -Y)
+            edge_standard(
+                length = length,
+                width  = width,
+                height = height,
+                has_spline_x = true,
+                has_spline_z = false
+            );
+            
+            // Female hinge knuckle on +Z face (facing front -Y)
+            // Offset towards the inside door side (-X face in local, -X in global)
+            translate([-width/2 + 4.0, 0, height/2 + 2.0])
+            rotate([90, 0, 0])
+            hinge_female_knuckle();
+        }
     }
 }
 

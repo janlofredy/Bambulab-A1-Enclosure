@@ -26,20 +26,20 @@ module corner_part() {
             // Branch along +Z (24x24 cross-section extending to cs)
             cube([bw, bw, cs], center = false);
             
-            // Male wedge tenon on +Z arm (projects upright in +Z direction)
+            // Male wedge tenon on +Z arm (projects upright in +Z direction, inside quadrant)
             translate([bw/2, bh/2, cs])
-            rotate([90, 0, 0])
+            rotate([90, 0, 270])
             male_dovetail(w = bw, h = bh);
         }
         
-        // Female open-top wedge pocket on +X arm (recesses into -X, open at bottom -Z)
+        // Female open-top wedge pocket on +X arm (recesses into -X, open to inside +Z)
         translate([cs, bw/2, bh/2])
-        rotate([0, 0, 90])
+        rotate([0, 180, 90])
         female_dovetail_pocket(w = bw, h = bh);
         
-        // Female open-top wedge pocket on +Y arm (recesses into -Y, open at bottom -Z)
+        // Female open-top wedge pocket on +Y arm (recesses into -Y, open to inside +X)
         translate([bw/2, cs, bh/2])
-        mirror([0, 1, 0])
+        rotate([180, 90, 0])
         female_dovetail_pocket(w = bw, h = bh);
         
         // Rubber bumper foot recess on bottom face (-Z)
