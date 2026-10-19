@@ -18,12 +18,26 @@ module door_edge_handle(
         // Base door edge body
         door_edge(length = length, width = width, thick = thick);
         
-        // Ergonomic curved pull handle (protrudes forward in +Z)
-        translate([is_left_door ? -width/4 : width/4, 0, thick/2 + 10])
-        hull() {
-            translate([0, -18, 0]) sphere(r = 5);
-            translate([0,  18, 0]) sphere(r = 5);
-            translate([is_left_door ? -8 : 8, 0, 4]) sphere(r = 6);
+        // Solidly anchored ergonomic pull handle with tactile finger hook
+        // Rooted directly into door surface at Z = thick/2, offset clear of spline slot
+        handle_x = is_left_door ? -width/2 + 2.5 : width/2 - 2.5;
+        
+        difference() {
+            translate([handle_x, 0, thick/2])
+            hull() {
+                // Anchored directly into door surface (Z=thick/2)
+                translate([0, -20, 0]) cube([4.0, 10, 1], center = true);
+                translate([0,  20, 0]) cube([4.0, 10, 1], center = true);
+                
+                // Outer contoured pull wing
+                translate([is_left_door ? -4 : 4, -14, 15]) sphere(r = 4.0);
+                translate([is_left_door ? -4 : 4,  14, 15]) sphere(r = 4.0);
+                translate([is_left_door ? -7 : 7,   0, 17]) sphere(r = 5.0);
+            }
+            
+            // Subtle concave finger-grip scallop on the pulling side
+            translate([is_left_door ? -width/2 - 5 : width/2 + 5, 0, thick/2 + 10])
+            cylinder(r = 7.5, h = 32, center = true);
         }
         
         // Draft-stop overlap lip (seals center seam between French doors)
