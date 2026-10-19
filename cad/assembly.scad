@@ -4,6 +4,7 @@
 // Composed exclusively from the 8 standardized parts:
 //   Frame: corner_part, edge_standard, edge_hinge, edge_ptfe
 //   Doors: door_corner, door_edge, door_edge_handle, door_edge_hinge
+//   Spline: spline_clip
 // ====================================================================
 include <config.scad>
 use <parts/corner_part.scad>
@@ -14,22 +15,101 @@ use <parts/door_corner.scad>
 use <parts/door_edge.scad>
 use <parts/door_edge_handle.scad>
 use <parts/door_edge_hinge.scad>
+use <modules/spline_profile.scad>
 
 // Palette
-COLOR_FRAME    = [0.25, 0.28, 0.32, 1.0]; // Dark Slate Frame
+COLOR_FRAME    = [0.28, 0.32, 0.36, 1.0]; // Slate Frame Beams
 COLOR_CORNERS  = [0.90, 0.45, 0.10, 1.0]; // Orange Corner Blocks
 COLOR_PTFE     = [0.10, 0.75, 0.50, 1.0]; // Emerald PTFE Entry
 COLOR_DOORS    = [0.20, 0.65, 0.90, 0.95]; // Cyan Face-Overlay Doors
-COLOR_PLASTIC  = [0.85, 0.95, 1.00, 0.22]; // Translucent Cellophane
-COLOR_PRINTER  = [0.50, 0.50, 0.50, 0.20]; // Ghosted Printer Volume
+COLOR_SPLINE   = [0.12, 0.60, 0.95, 1.0]; // Cerulean Compliant Spline Clips
+COLOR_PLASTIC  = [0.85, 0.95, 1.00, 0.28]; // Translucent Flexible Cellophane
+COLOR_PRINTER  = [0.50, 0.50, 0.50, 0.18]; // Ghosted Printer Volume
 COLOR_SPOOL    = [0.90, 0.20, 0.20, 0.75]; // Red BMCU / Spool
 
 OUTER_W = 2*CORNER_SIZE + 3*FRAME_EDGE_LEN; // ~627 mm
 OUTER_D = 2*CORNER_SIZE + 3*FRAME_EDGE_LEN; // ~627 mm
 OUTER_H = 2*CORNER_SIZE + 4*FRAME_EDGE_LEN; // ~812 mm
 
-module full_enclosure_assembly() {
+// Modular Door Leaf assembled from the 4 modular door parts
+module modular_door_leaf(is_left = true) {
+    dw = OUTER_W / 2;
+    dh = OUTER_H - 12;
+    cw = DOOR_CORNER_W; // 25 mm
+    pw = DOOR_PROFILE_W; // 18 mm
+    pt = DOOR_PROFILE_T; // 16 mm
     
+    union() {
+        // 4 L-Corners
+        // Bottom-Hinge
+        translate([is_left ? 0 : dw, 0, 0])
+        mirror([is_left ? 0 : 1, 0, 0])
+        rotate([90, 0, 0])
+        door_corner();
+        
+        // Top-Hinge
+        translate([is_left ? 0 : dw, 0, dh])
+        mirror([is_left ? 0 : 1, 0, 0])
+        rotate([90, 0, 0])
+        mirror([0, 1, 0])
+        door_corner();
+        
+        // Bottom-Center
+        translate([is_left ? dw : 0, 0, 0])
+        mirror([is_left ? 1 : 0, 0, 0])
+        rotate([90, 0, 0])
+        door_corner();
+        
+        // Top-Center
+        translate([is_left ? dw : 0, 0, dh])
+        mirror([is_left ? 1 : 0, 0, 0])
+        rotate([90, 0, 0])
+        mirror([0, 1, 0])
+        door_corner();
+        
+        // Horizontal top & bottom spans
+        translate([dw/2, 0, pw/2])
+        rotate([90, 90, 0])
+        door_edge(length = dw - 2*cw);
+        
+        translate([dw/2, 0, dh - pw/2])
+        rotate([90, 90, 0])
+        door_edge(length = dw - 2*cw);
+        
+        // Outer vertical pillar (hinge side)
+        hinge_x = is_left ? pw/2 : dw - pw/2;
+        for (i = [0 : 2]) {
+            translate([hinge_x, 0, cw + i*DOOR_EDGE_LEN + DOOR_EDGE_LEN/2])
+            rotate([90, 0, 0])
+            door_edge_hinge(is_left_door = is_left);
+        }
+        for (i = [3 : 4]) {
+            translate([hinge_x, 0, cw + i*DOOR_EDGE_LEN + DOOR_EDGE_LEN/2])
+            rotate([90, 0, 0])
+            door_edge();
+        }
+        
+        // Inner vertical pillar (handle side)
+        center_x = is_left ? dw - pw/2 : pw/2;
+        // Middle segment has handle
+        translate([center_x, 0, cw + 2*DOOR_EDGE_LEN + DOOR_EDGE_LEN/2])
+        rotate([90, 0, 0])
+        door_edge_handle(is_left_door = is_left);
+        
+        for (i = [0, 1, 3, 4]) {
+            translate([center_x, 0, cw + i*DOOR_EDGE_LEN + DOOR_EDGE_LEN/2])
+            rotate([90, 0, 0])
+            door_edge();
+        }
+        
+        // Door cellophane pane
+        color(COLOR_PLASTIC)
+        translate([dw/2, 0, dh/2])
+        cube([dw - 2*pw, 0.25, dh - 2*pw], center = true);
+    }
+}
+
+module full_enclosure_assembly(show_splines = true, show_cellophane = true, show_doors = true) {
     // ----------------------------------------------------
     // 1. The 8 Corner Blocks (4 Bottom, 4 Top)
     // ----------------------------------------------------
@@ -57,7 +137,7 @@ module full_enclosure_assembly() {
     // 2. Standardized Horizontal & Vertical Frame Edges
     // ----------------------------------------------------
     color(COLOR_FRAME) {
-        // Bottom Front Beam (3 segments)
+        // Bottom Front Beam (3 segments, clean face for door overlay)
         for (i = [0 : 2]) {
             translate([CORNER_SIZE + i*FRAME_EDGE_LEN + FRAME_EDGE_LEN/2, BEAM_WIDTH/2, BEAM_HEIGHT/2])
             rotate([0, 0, -90])
@@ -77,12 +157,21 @@ module full_enclosure_assembly() {
             edge_standard(has_spline = true);
         }
         
-        // Top Beams (Front, Rear, Left, Right - 3 segments each)
+        // Bottom Left Beam (Segments 0 & 2 standard)
+        translate([BEAM_WIDTH/2, CORNER_SIZE + 0*FRAME_EDGE_LEN + FRAME_EDGE_LEN/2, BEAM_HEIGHT/2])
+        rotate([0, 0, 180])
+        edge_standard(has_spline = true);
+        
+        translate([BEAM_WIDTH/2, CORNER_SIZE + 2*FRAME_EDGE_LEN + FRAME_EDGE_LEN/2, BEAM_HEIGHT/2])
+        rotate([0, 0, 180])
+        edge_standard(has_spline = true);
+        
+        // Top Beams
         for (i = [0 : 2]) {
-            // Top Front
+            // Top Front (Spline on top face only)
             translate([CORNER_SIZE + i*FRAME_EDGE_LEN + FRAME_EDGE_LEN/2, BEAM_WIDTH/2, OUTER_H - BEAM_HEIGHT/2])
             rotate([0, 0, -90])
-            edge_standard(has_spline = false);
+            edge_standard(has_spline_x = false, has_spline_z = true);
             
             // Top Rear
             translate([CORNER_SIZE + i*FRAME_EDGE_LEN + FRAME_EDGE_LEN/2, OUTER_D - BEAM_WIDTH/2, OUTER_H - BEAM_HEIGHT/2])
@@ -91,6 +180,7 @@ module full_enclosure_assembly() {
             
             // Top Left
             translate([BEAM_WIDTH/2, CORNER_SIZE + i*FRAME_EDGE_LEN + FRAME_EDGE_LEN/2, OUTER_H - BEAM_HEIGHT/2])
+            rotate([0, 0, 180])
             edge_standard(has_spline = true);
             
             // Top Right
@@ -98,106 +188,155 @@ module full_enclosure_assembly() {
             edge_standard(has_spline = true);
         }
         
-        // Rear Vertical Pillars (2 corners x 4 segments each)
+        // Vertical Rear Pillars
         for (i = [0 : 3]) {
             translate([BEAM_WIDTH/2, OUTER_D - BEAM_WIDTH/2, CORNER_SIZE + i*FRAME_EDGE_LEN + FRAME_EDGE_LEN/2])
-            rotate([90, 0, 0])
+            rotate([90, 0, 180])
             edge_standard(has_spline = true);
             
             translate([OUTER_W - BEAM_WIDTH/2, OUTER_D - BEAM_WIDTH/2, CORNER_SIZE + i*FRAME_EDGE_LEN + FRAME_EDGE_LEN/2])
-            rotate([90, 0, 0])
+            rotate([90, 0, 90])
             edge_standard(has_spline = true);
         }
-    }
-    
-    // ----------------------------------------------------
-    // 3. Bottom Side Beam with 4-Tube PTFE Route
-    // ----------------------------------------------------
-    color(COLOR_FRAME) {
-        translate([BEAM_WIDTH/2, CORNER_SIZE + 0*FRAME_EDGE_LEN + FRAME_EDGE_LEN/2, BEAM_HEIGHT/2])
-        edge_standard(has_spline = true);
         
-        translate([BEAM_WIDTH/2, CORNER_SIZE + 2*FRAME_EDGE_LEN + FRAME_EDGE_LEN/2, BEAM_HEIGHT/2])
-        edge_standard(has_spline = true);
-    }
-    color(COLOR_PTFE) {
-        // Middle segment on lower left beam is the PTFE port!
-        translate([BEAM_WIDTH/2, CORNER_SIZE + 1*FRAME_EDGE_LEN + FRAME_EDGE_LEN/2, BEAM_HEIGHT/2])
-        edge_ptfe();
-    }
-    
-    // ----------------------------------------------------
-    // 4. Front Vertical Corner Pillars with Integrated Hinges
-    // ----------------------------------------------------
-    color(COLOR_FRAME) {
-        // Left Front Pillar (Segments 0, 1, 2 have hinges; segment 3 standard)
+        // Vertical Front Pillars (Hinges on segments 0, 1, 2)
         for (i = [0 : 2]) {
             translate([BEAM_WIDTH/2, BEAM_WIDTH/2, CORNER_SIZE + i*FRAME_EDGE_LEN + FRAME_EDGE_LEN/2])
             rotate([90, 0, 0])
             edge_hinge(is_left_pillar = true);
+            
+            translate([OUTER_W - BEAM_WIDTH/2, BEAM_WIDTH/2, CORNER_SIZE + i*FRAME_EDGE_LEN + FRAME_EDGE_LEN/2])
+            rotate([90, 0, 0])
+            edge_hinge(is_left_pillar = false);
         }
         translate([BEAM_WIDTH/2, BEAM_WIDTH/2, CORNER_SIZE + 3*FRAME_EDGE_LEN + FRAME_EDGE_LEN/2])
         rotate([90, 0, 0])
         edge_standard(has_spline = false);
         
-        // Right Front Pillar
-        for (i = [0 : 2]) {
-            translate([OUTER_W - BEAM_WIDTH/2, BEAM_WIDTH/2, CORNER_SIZE + i*FRAME_EDGE_LEN + FRAME_EDGE_LEN/2])
-            rotate([90, 0, 0])
-            edge_hinge(is_left_pillar = false);
-        }
         translate([OUTER_W - BEAM_WIDTH/2, BEAM_WIDTH/2, CORNER_SIZE + 3*FRAME_EDGE_LEN + FRAME_EDGE_LEN/2])
         rotate([90, 0, 0])
         edge_standard(has_spline = false);
     }
     
+    // Bottom Side Beam PTFE Entry Port (Middle segment)
+    color(COLOR_PTFE) {
+        translate([BEAM_WIDTH/2, CORNER_SIZE + 1*FRAME_EDGE_LEN + FRAME_EDGE_LEN/2, BEAM_HEIGHT/2])
+        rotate([0, 0, 180])
+        edge_ptfe();
+    }
+    
     // ----------------------------------------------------
-    // 5. Dual Face-Overlay French Doors (Left & Right)
-    // Resting directly against the front face of the 24mm frame beams
+    // 3. Flexible Cellophane Membrane on All Faces (Except Faces with Doors)
     // ----------------------------------------------------
-    color(COLOR_DOORS) {
-        door_w = OUTER_W / 2;
-        door_h = OUTER_H;
-        
-        // Left Door Leaf (Shown slightly open at 18 deg)
-        translate([BEAM_WIDTH/2 - 2, 0, 0])
-        rotate([0, 0, -18])
-        translate([door_w/2, -DOOR_PROFILE_T/2, door_h/2])
-        difference() {
-            cube([door_w, DOOR_PROFILE_T, door_h - 12], center = true);
-            cube([door_w - 2*DOOR_PROFILE_W, DOOR_PROFILE_T + 4, door_h - 12 - 2*DOOR_PROFILE_W], center = true);
-        }
-        
-        // Right Door Leaf (Closed position, resting flush against frame face)
-        translate([OUTER_W - BEAM_WIDTH/2 + 2, 0, 0])
-        translate([-door_w/2, -DOOR_PROFILE_T/2, door_h/2])
-        difference() {
-            cube([door_w, DOOR_PROFILE_T, door_h - 12], center = true);
-            cube([door_w - 2*DOOR_PROFILE_W, DOOR_PROFILE_T + 4, door_h - 12 - 2*DOOR_PROFILE_W], center = true);
+    if (show_cellophane) {
+        color(COLOR_PLASTIC) {
+            // Left Wall
+            translate([0, OUTER_D/2, OUTER_H/2])
+            cube([0.25, OUTER_D - 24, OUTER_H - 24], center = true);
+            
+            // Right Wall
+            translate([OUTER_W, OUTER_D/2, OUTER_H/2])
+            cube([0.25, OUTER_D - 24, OUTER_H - 24], center = true);
+            
+            // Rear Wall
+            translate([OUTER_W/2, OUTER_D, OUTER_H/2])
+            cube([OUTER_W - 24, 0.25, OUTER_H - 24], center = true);
+            
+            // Top Roof
+            translate([OUTER_W/2, OUTER_D/2, OUTER_H])
+            cube([OUTER_W - 24, OUTER_D - 24, 0.25], center = true);
         }
     }
     
     // ----------------------------------------------------
-    // 6. Cellophane Panels (Mounted on doors and static walls)
+    // 4. Snapped-In Compliant Spring Spline Clips (All Faces Except Doors)
     // ----------------------------------------------------
-    color(COLOR_PLASTIC) {
-        // Left Static Wall
-        translate([BEAM_WIDTH/2, OUTER_D/2, OUTER_H/2])
-        cube([0.5, OUTER_D - 2*CORNER_SIZE, OUTER_H - 2*CORNER_SIZE], center = true);
-        // Right Static Wall
-        translate([OUTER_W - BEAM_WIDTH/2, OUTER_D/2, OUTER_H/2])
-        cube([0.5, OUTER_D - 2*CORNER_SIZE, OUTER_H - 2*CORNER_SIZE], center = true);
-        // Rear Static Wall
-        translate([OUTER_W/2, OUTER_D - BEAM_WIDTH/2, OUTER_H/2])
-        cube([OUTER_W - 2*CORNER_SIZE, 0.5, OUTER_H - 2*CORNER_SIZE], center = true);
-        
-        // Right Door Cellophane Pane (moves with door)
-        translate([OUTER_W/4 * 3, -DOOR_PROFILE_T/2, OUTER_H/2])
-        cube([OUTER_W/2 - 2*DOOR_PROFILE_W, 0.5, OUTER_H - 12 - 2*DOOR_PROFILE_W], center = true);
+    if (show_splines) {
+        color(COLOR_SPLINE) {
+            // --- Left Face (14 clips) ---
+            for (i = [0 : 2]) {
+                translate([0, CORNER_SIZE + i*FRAME_EDGE_LEN + FRAME_EDGE_LEN/2, BEAM_HEIGHT/2])
+                rotate([0, -90, 0]) spline_clip(length = FRAME_SPLINE_LEN, axis = "Y");
+                
+                translate([0, CORNER_SIZE + i*FRAME_EDGE_LEN + FRAME_EDGE_LEN/2, OUTER_H - BEAM_HEIGHT/2])
+                rotate([0, -90, 0]) spline_clip(length = FRAME_SPLINE_LEN, axis = "Y");
+            }
+            for (i = [0 : 3]) {
+                translate([0, BEAM_WIDTH/2, CORNER_SIZE + i*FRAME_EDGE_LEN + FRAME_EDGE_LEN/2])
+                rotate([90, 0, -90]) spline_clip(length = FRAME_SPLINE_LEN, axis = "Y");
+                
+                translate([0, OUTER_D - BEAM_WIDTH/2, CORNER_SIZE + i*FRAME_EDGE_LEN + FRAME_EDGE_LEN/2])
+                rotate([90, 0, -90]) spline_clip(length = FRAME_SPLINE_LEN, axis = "Y");
+            }
+            
+            // --- Right Face (14 clips) ---
+            for (i = [0 : 2]) {
+                translate([OUTER_W, CORNER_SIZE + i*FRAME_EDGE_LEN + FRAME_EDGE_LEN/2, BEAM_HEIGHT/2])
+                rotate([0, 90, 0]) spline_clip(length = FRAME_SPLINE_LEN, axis = "Y");
+                
+                translate([OUTER_W, CORNER_SIZE + i*FRAME_EDGE_LEN + FRAME_EDGE_LEN/2, OUTER_H - BEAM_HEIGHT/2])
+                rotate([0, 90, 0]) spline_clip(length = FRAME_SPLINE_LEN, axis = "Y");
+            }
+            for (i = [0 : 3]) {
+                translate([OUTER_W, BEAM_WIDTH/2, CORNER_SIZE + i*FRAME_EDGE_LEN + FRAME_EDGE_LEN/2])
+                rotate([90, 0, 90]) spline_clip(length = FRAME_SPLINE_LEN, axis = "Y");
+                
+                translate([OUTER_W, OUTER_D - BEAM_WIDTH/2, CORNER_SIZE + i*FRAME_EDGE_LEN + FRAME_EDGE_LEN/2])
+                rotate([90, 0, 90]) spline_clip(length = FRAME_SPLINE_LEN, axis = "Y");
+            }
+            
+            // --- Rear Face (14 clips) ---
+            for (i = [0 : 2]) {
+                translate([CORNER_SIZE + i*FRAME_EDGE_LEN + FRAME_EDGE_LEN/2, OUTER_D, BEAM_HEIGHT/2])
+                rotate([0, -90, -90]) spline_clip(length = FRAME_SPLINE_LEN, axis = "Y");
+                
+                translate([CORNER_SIZE + i*FRAME_EDGE_LEN + FRAME_EDGE_LEN/2, OUTER_D, OUTER_H - BEAM_HEIGHT/2])
+                rotate([0, -90, -90]) spline_clip(length = FRAME_SPLINE_LEN, axis = "Y");
+            }
+            for (i = [0 : 3]) {
+                translate([BEAM_WIDTH/2, OUTER_D, CORNER_SIZE + i*FRAME_EDGE_LEN + FRAME_EDGE_LEN/2])
+                rotate([90, 0, 180]) spline_clip(length = FRAME_SPLINE_LEN, axis = "Y");
+                
+                translate([OUTER_W - BEAM_WIDTH/2, OUTER_D, CORNER_SIZE + i*FRAME_EDGE_LEN + FRAME_EDGE_LEN/2])
+                rotate([90, 0, 180]) spline_clip(length = FRAME_SPLINE_LEN, axis = "Y");
+            }
+            
+            // --- Top Roof Face (12 clips) ---
+            for (i = [0 : 2]) {
+                translate([CORNER_SIZE + i*FRAME_EDGE_LEN + FRAME_EDGE_LEN/2, BEAM_WIDTH/2, OUTER_H])
+                rotate([0, 0, -90]) spline_clip(length = FRAME_SPLINE_LEN, axis = "Y");
+                
+                translate([CORNER_SIZE + i*FRAME_EDGE_LEN + FRAME_EDGE_LEN/2, OUTER_D - BEAM_WIDTH/2, OUTER_H])
+                rotate([0, 0, -90]) spline_clip(length = FRAME_SPLINE_LEN, axis = "Y");
+                
+                translate([BEAM_WIDTH/2, CORNER_SIZE + i*FRAME_EDGE_LEN + FRAME_EDGE_LEN/2, OUTER_H])
+                rotate([0, 0, 0]) spline_clip(length = FRAME_SPLINE_LEN, axis = "Y");
+                
+                translate([OUTER_W - BEAM_WIDTH/2, CORNER_SIZE + i*FRAME_EDGE_LEN + FRAME_EDGE_LEN/2, OUTER_H])
+                rotate([0, 0, 0]) spline_clip(length = FRAME_SPLINE_LEN, axis = "Y");
+            }
+        }
     }
     
     // ----------------------------------------------------
-    // 7. Bambu Lab A1 Printer Envelope & Poop Bucket
+    // 5. Dual Face-Overlay Modular Doors (Front Face Only)
+    // ----------------------------------------------------
+    if (show_doors) {
+        color(COLOR_DOORS) {
+            // Left Door (swung open 25 degrees)
+            translate([BEAM_WIDTH/2 - 2, 0, 6])
+            rotate([0, 0, -25])
+            translate([-(BEAM_WIDTH/2 - 2), -DOOR_PROFILE_T, 0])
+            modular_door_leaf(is_left = true);
+            
+            // Right Door (closed flush against front 24mm frame face)
+            translate([0, -DOOR_PROFILE_T, 6])
+            modular_door_leaf(is_left = false);
+        }
+    }
+    
+    // ----------------------------------------------------
+    // 6. Bambu Lab A1 Printer Envelope & Poop Bucket
     // ----------------------------------------------------
     color(COLOR_PRINTER) {
         // Base
